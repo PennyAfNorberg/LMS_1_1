@@ -25,8 +25,8 @@ namespace LMS_1_1.Repository
 
         //private readonly RoleManager<LMSUser> _roleManager;
 
-        public ProgramRepository (ApplicationDbContext ctx, ILogger<ProgramRepository> logger ,UserManager<LMSUser> userManager
-        ,IHostingEnvironment environment, IDocumentRepository DocumentRepository
+        public ProgramRepository(ApplicationDbContext ctx, ILogger<ProgramRepository> logger, UserManager<LMSUser> userManager
+        , IHostingEnvironment environment, IDocumentRepository DocumentRepository
             )
         {
             _ctx = ctx;
@@ -37,7 +37,7 @@ namespace LMS_1_1.Repository
             // _roleManager = roleManager;
         }
         #region Commen
-        public async Task AddEntityAsync (object model)
+        public async Task AddEntityAsync(object model)
         {
             if (model is IProgram || model is ActivityType)
             {
@@ -45,14 +45,14 @@ namespace LMS_1_1.Repository
             }
         }
 
-        public void UpdateEntity (object model)
+        public void UpdateEntity(object model)
         {
             if (model is IProgram || model is ActivityType)
             {
                 _ctx.Update(model);
             }
         }
-        public void RemoveEntity (object model)
+        public void RemoveEntity(object model)
         {
             if (model is IProgram || model is ActivityType)
             {
@@ -60,12 +60,12 @@ namespace LMS_1_1.Repository
             }
         }
 
-        public async Task<bool> SaveAllAsync ()
+        public async Task<bool> SaveAllAsync()
         {
             return await _ctx.SaveChangesAsync() > 0;
         }
 
-        public string GetCourseImageUploadPath ()
+        public string GetCourseImageUploadPath()
         {
             string rootPath = _environment.ContentRootPath;
             var folderName = Path.Combine("clientApp", "assets/img");
@@ -75,7 +75,7 @@ namespace LMS_1_1.Repository
         }
         #endregion
         #region Course
-        public async Task<IEnumerable<Course>> GetAllCoursesAsync (bool includeModule)
+        public async Task<IEnumerable<Course>> GetAllCoursesAsync(bool includeModule)
         {
             var courses = _ctx.Courses;
             if (includeModule)
@@ -89,7 +89,7 @@ namespace LMS_1_1.Repository
 
 
 
-        public async Task<Course> GetCourseByIdAsync (Guid courseId, bool includeModule)
+        public async Task<Course> GetCourseByIdAsync(Guid courseId, bool includeModule)
         {
             var course = _ctx.Courses
                .Where(c => c.Id == courseId);
@@ -110,7 +110,7 @@ namespace LMS_1_1.Repository
 
         public async Task<IEnumerable<Course>> GetCoursesForUserAsync(string userid)
         {
-            var user =await  _userManager.FindByIdAsync(userid);
+            var user = await _userManager.FindByIdAsync(userid);
             if ((await _userManager.GetRolesAsync(user)).Any(r => r == "Teacher"))
             {
                 var courses = _ctx.Courses;
@@ -118,15 +118,15 @@ namespace LMS_1_1.Repository
             }
             else
             {
-                var courseids =await _ctx.CourseUsers.Where(cu => cu.LMSUserId == userid).Select(cu=> cu.CourseId).ToListAsync();
+                var courseids = await _ctx.CourseUsers.Where(cu => cu.LMSUserId == userid).Select(cu => cu.CourseId).ToListAsync();
                 var res = _ctx.Courses
                         .Where(c => courseids.Contains(c.Id));
 
                 return await res.ToListAsync();
 
             }
-       
-            
+
+
         }
 
         public async Task<bool> RemoveCourseHelperAsync(Guid coursedid)
@@ -183,12 +183,12 @@ namespace LMS_1_1.Repository
 
             for (int i = 0; i < Alldocclones.Count(); i++)
             {
-                if(Alldocclones[i].CourseId== Guid.Parse(cloneFormModel.Id))
+                if (Alldocclones[i].CourseId == Guid.Parse(cloneFormModel.Id))
                 {
-                    Alldocclones[i].NewCourseId= cloneFormModel.NewCourseId;
+                    Alldocclones[i].NewCourseId = cloneFormModel.NewCourseId;
                 }
             }
-  
+
             foreach (var mod in coursedata.Modules.Where(m => m.CourseId == Guid.Parse(cloneFormModel.Id)))
             {
 
@@ -203,10 +203,10 @@ namespace LMS_1_1.Repository
 
                 // add modules Save old and new modulid
                 await _ctx.Modules.AddAsync(tmp2);
-                 _ctx.SaveChanges();
-                for (int i = 0;  i < Alldocclones.Count(); i++)
+                _ctx.SaveChanges();
+                for (int i = 0; i < Alldocclones.Count(); i++)
                 {
-                    if(Alldocclones[i].ModuleId==mod.Id)
+                    if (Alldocclones[i].ModuleId == mod.Id)
                     {
                         Alldocclones[i].NewModuleId = tmp2.Id;
                     }
@@ -232,15 +232,15 @@ namespace LMS_1_1.Repository
                     await _ctx.SaveChangesAsync();
                     for (int i = 0; i < Alldocclones.Count(); i++)
                     {
-                        if(Alldocclones[i].LMSActivityId==act.Id)
+                        if (Alldocclones[i].LMSActivityId == act.Id)
                         {
-                            Alldocclones[i].NewLMSActivityId= tmpact.Id;
+                            Alldocclones[i].NewLMSActivityId = tmpact.Id;
                         }
                     }
-                   /* foreach (var doc in Alldocclones.Where(d => d.LMSActivityId == act.Id))
-                    {
-                        doc.NewLMSActivityId = tmpact.Id;
-                    }*/
+                    /* foreach (var doc in Alldocclones.Where(d => d.LMSActivityId == act.Id))
+                     {
+                         doc.NewLMSActivityId = tmpact.Id;
+                     }*/
                 }
             }
             // in with docs
@@ -274,13 +274,13 @@ namespace LMS_1_1.Repository
         }
 
 
-        public async Task<bool> CourseExistsAsync (Guid courseId)
+        public async Task<bool> CourseExistsAsync(Guid courseId)
         {
             return await _ctx.Courses.AnyAsync(e => e.Id == courseId);
         }
         #endregion
         #region Module
-        public async Task<IEnumerable<Module>> GetAllModulesAsync (bool includeActivities)
+        public async Task<IEnumerable<Module>> GetAllModulesAsync(bool includeActivities)
         {
             var modules = _ctx.Modules
                           .Include(c => c.Courses);
@@ -296,7 +296,7 @@ namespace LMS_1_1.Repository
 
         }
 
-        public async Task<Module> GetModuleByIdAsync (Guid moduleId, bool includeActivity)
+        public async Task<Module> GetModuleByIdAsync(Guid moduleId, bool includeActivity)
         {
             var module = _ctx.Modules
                          .Include(c => c.Courses)
@@ -322,21 +322,41 @@ namespace LMS_1_1.Repository
             return await _DocumentRepository.RemoveDocumentRangeAsync(docModule.ToList());
         }
 
+        public async Task<bool> MoveModule(ModuleViewModel modelVm)
+        {
+            var old_module = await_ctx.Modules.Where(m => m.id == modelVm.id).FirstOrDefaultAsync();
+            var diffstart = old_module.StartDate - modelVm.StartDate;
+            var diffend = old_module.EndDate - modelVm.EndDate;
+            // Get old module
+            // set Datediffs
 
-        public async Task<bool> ModuleExistsAsync (Guid moduleId)
+            // update the module
+
+            // get all later modules
+            // update dates
+
+            // call MoveActivity but as
+            // no insert
+            // given diffs
+
+
+        }
+
+
+        public async Task<bool> ModuleExistsAsync(Guid moduleId)
         {
             return await _ctx.Modules.AnyAsync(e => e.Id == moduleId);
         }
         #endregion
         #region Activity
-        public async Task<IEnumerable<LMSActivity>> GetAllActivitiesAsync ()
+        public async Task<IEnumerable<LMSActivity>> GetAllActivitiesAsync()
         {
             return await _ctx.LMSActivity
                      .Include(a => a.ActivityType)
                       .Include(a => a.Modules).ToListAsync();
         }
 
-        public async Task<LMSActivity> GetActivityByIdAsync (Guid activityId)
+        public async Task<LMSActivity> GetActivityByIdAsync(Guid activityId)
         {
             return await _ctx.LMSActivity
                  .Include(a => a.ActivityType)
@@ -350,6 +370,14 @@ namespace LMS_1_1.Repository
             var docActivity = await _DocumentRepository.GetAllDocumentsForActivityAsync(activityid);
             return await _DocumentRepository.RemoveDocumentRangeAsync(docActivity.ToList());
         }
+
+        public async Task<bool> MoveLMSActivity(ActivityFormModell modelVm)
+        {
+            // Get old LMSActivity
+            // set Datediffs
+            // Set Later LMSActivities
+        }
+        
 
         public async Task<bool> LMSActivityExistsAsync (Guid activityId)
         {

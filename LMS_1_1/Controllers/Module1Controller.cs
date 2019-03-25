@@ -85,7 +85,7 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Module1/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}","Edit")]
         [Authorize(Roles = "Teacher")]
         public async Task<ActionResult<LMSActivity>>  Put(string id, [FromBody]  ModuleViewModel modelVm)
         {
@@ -94,9 +94,11 @@ namespace LMS_1_1.Controllers
             {
                 return BadRequest();
             }
-
+            //MoveModule(ModuleViewModel modelVm)
+            _programrepository.MoveModule(modelVm);
             //  Guid Crid = new Guid(activtyVm.id);
-
+            var diffstart = modelVm.StartDate;
+            var diffend = modelVm.EndDate;
             Module module = new Module
             {
                 Id = Guid.Parse(modelVm.Id),
@@ -128,6 +130,52 @@ namespace LMS_1_1.Controllers
 
             return NoContent();
         }
+
+        // PUT: api/Module1/5
+        [HttpPut("{id}", "Move")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<LMSActivity>> PutMove(string id, [FromBody]  ModuleViewModel modelVm)
+        {
+            //if (editModel.criD==null)
+            if (id != modelVm.Id.ToString())
+            {
+                return BadRequest();
+            }
+
+            //  Guid Crid = new Guid(activtyVm.id);
+
+            Module module = new Module
+            {
+                Id = Guid.Parse(modelVm.Id),
+                Name = modelVm.Name,
+                StartDate = modelVm.StartDate,
+                EndDate = modelVm.EndDate,
+                Description = modelVm.Description,
+                CourseId = modelVm.CourseId
+            };
+
+            _context.Entry(module).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ModuleExists(module.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         // DELETE: api/module1/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Teacher")]

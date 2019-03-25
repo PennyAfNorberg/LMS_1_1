@@ -26,6 +26,7 @@ namespace LMS_1_1.Repository
         Task<IEnumerable<LMSActivity>> GetAllActivitiesAsync ();
         Task<LMSActivity> GetActivityByIdAsync (Guid activityId);
         Task<bool> LMSActivityExistsAsync (Guid id);
+        Task<bool> MoveLMSActivity(ActivityFormModell modelVm);
 
         Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync ();
         Task<ActivityType> GetAllActivityTypesByIdAsync (int activityTypeId);
@@ -37,7 +38,7 @@ namespace LMS_1_1.Repository
         Task<bool> RemoveCourseHelperAsync(Guid courseid);
         Task<bool> RemoveModuleHelperAsync(Guid moduleid);
         Task<bool> RemoveActivityHelperAsync(Guid activityid);
-
+        Task<bool> MoveModule(ModuleViewModel modelVm);
         Task<bool> CheckIfModuleInRange(string courseid, DateTime start, DateTime end);
         Task<bool> CheckIfActivityInRange(string modulid, DateTime start, DateTime end);
         Task<bool> SaveAllAsync ();

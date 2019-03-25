@@ -79,25 +79,48 @@ export class EditComponent implements OnInit, OnDestroy {
     // post data
   }
 
+   public move(): void
+   {
+      // Send to service => backend add diff date to all later once, change also start timdes to other with thesame start time
+      this.errorMessage = "";
+      this.validate();
+      if(this.errorMessage=="")
+      {
+        this.ModuleService.MoveModule(this.Module.id,this.Module )
+        .pipe(takeUntil(this.unsubscribe))
+        .subscribe( status =>
+          {
+            this.errorMessage="Module updated"
+            this.cd.markForCheck();
+          }
+          ,err =>  this.errorMessage = <any>err
+          
+          )
+      }
+   }
 
+private validate():void
+{
+  if(this.Module.startDate.valueOf()<this.coursestartdate.valueOf())
+  {
+      this.errorMessage= this.errorMessage + "Start date on module may not be before course start date ("+this.coursestartdate+")";
+  }
+  if(this.Module.endDate.valueOf()<this.coursestartdate.valueOf())
+  {
+      this.errorMessage= this.errorMessage + "End date on module may not be before course start date ("+this.coursestartdate+")";
+  } 
+  if(this.Module.endDate.valueOf()<this.Module.startDate.valueOf())
+  {
+    this.errorMessage= this.errorMessage +" A module must end after it's start";
+  }
+}
   public Register(theForm):void
   {
     this.errorMessage = "";
-    if(this.Module.startDate.valueOf()<this.coursestartdate.valueOf())
-    {
-        this.errorMessage= this.errorMessage + "Start date on module may not be before course start date ("+this.coursestartdate+")";
-    }
-    if(this.Module.endDate.valueOf()<this.coursestartdate.valueOf())
-    {
-        this.errorMessage= this.errorMessage + "End date on module may not be before course start date ("+this.coursestartdate+")";
-    } 
-    if(this.Module.endDate.valueOf()<this.Module.startDate.valueOf())
-    {
-      this.errorMessage= this.errorMessage +" A module must end after it's start";
-    } 
+    this.validate();
     if(this.errorMessage=="")
     {
-      this.ModuleService.EditCreateModule(this.Module.id,this.Module )
+      this.ModuleService.EditModule(this.Module.id,this.Module )
       .pipe(takeUntil(this.unsubscribe))
       .subscribe( status =>
         {
