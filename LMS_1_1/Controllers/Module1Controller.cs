@@ -85,7 +85,8 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Module1/5
-        [HttpPut("{id}","Edit")]
+        [HttpPut("{id}")]
+        [AcceptVerbs("Edit")]
         [Authorize(Roles = "Teacher")]
         public async Task<ActionResult<LMSActivity>>  Put(string id, [FromBody]  ModuleViewModel modelVm)
         {
@@ -132,7 +133,8 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Module1/5
-        [HttpPut("{id}", "Move")]
+        [HttpPut("{id}")]
+        [AcceptVerbs("Move")]
         [Authorize(Roles = "Teacher")]
         public async Task<ActionResult<LMSActivity>> PutMove(string id, [FromBody]  ModuleViewModel modelVm)
         {
