@@ -324,7 +324,7 @@ namespace LMS_1_1.Repository
 
         public async Task<bool> MoveModule(ModuleViewModel modelVm)
         {
-            var old_module = await_ctx.Modules.Where(m => m.id == modelVm.id).FirstOrDefaultAsync();
+            var old_module = await _ctx.Modules.Where(m => m.Id.ToString() == modelVm.Id).FirstOrDefaultAsync();
             var diffstart = old_module.StartDate - modelVm.StartDate;
             var diffend = old_module.EndDate - modelVm.EndDate;
             // Get old module
@@ -339,7 +339,7 @@ namespace LMS_1_1.Repository
             // no insert
             // given diffs
 
-
+            return true;
 
         }
 
@@ -372,11 +372,12 @@ namespace LMS_1_1.Repository
             return await _DocumentRepository.RemoveDocumentRangeAsync(docActivity.ToList());
         }
 
-        public async Task<bool> MoveLMSActivity(ActivityFormModell modelVm)
+        public async Task<bool> MoveLMSActivity(ActivityFormModel modelVm)
         {
             // Get old LMSActivity
             // set Datediffs
             // Set Later LMSActivities
+            return true;
         }
         
 

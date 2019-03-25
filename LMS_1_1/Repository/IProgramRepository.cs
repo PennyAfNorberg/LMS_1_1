@@ -26,7 +26,7 @@ namespace LMS_1_1.Repository
         Task<IEnumerable<LMSActivity>> GetAllActivitiesAsync ();
         Task<LMSActivity> GetActivityByIdAsync (Guid activityId);
         Task<bool> LMSActivityExistsAsync (Guid id);
-        Task<bool> MoveLMSActivity(ActivityFormModell modelVm);
+        Task<bool> MoveLMSActivity(ActivityFormModel modelVm);
 
         Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync ();
         Task<ActivityType> GetAllActivityTypesByIdAsync (int activityTypeId);
