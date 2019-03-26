@@ -22,6 +22,7 @@ export class EditComponent implements OnInit, OnDestroy {
   Activityid: string="";
   ActivityTypes:IActivityType[];
   Courseid: string ="";
+  private startstartdate: Date;
 
   constructor(private db: AuthService
     , private cd: ChangeDetectorRef ,private route: ActivatedRoute
@@ -87,6 +88,7 @@ export class EditComponent implements OnInit, OnDestroy {
         resp =>  
         { 
           this.Activity=resp;
+          this.startstartdate=resp.startDate;
           this.cd.markForCheck();
         });
   }
@@ -121,9 +123,32 @@ export class EditComponent implements OnInit, OnDestroy {
   
     // post data
   }
-  public Register(theForm):void
+
+  public move(): void
   {
-    this.errorMessage = "";
+     // Send to service => backend add diff date to all later once, change also start timdes to other with thesame start time
+     this.errorMessage = "";
+     this.validate();
+     if (this.startstartdate!=this.Activity.startDate )
+       this.errorMessage=this.errorMessage+" Startdate change don't apply too move, inorder to move this start date move the previus entity instead";
+    
+     if(this.errorMessage=="")
+     {
+       this.ActivititesService.MoveActivity(this.Activity.id,this.Activity )
+       .pipe(takeUntil(this.unsubscribe))
+       .subscribe( status =>
+         {
+           this.errorMessage="Module updated"
+           this.cd.markForCheck();
+         }
+         ,err =>  this.errorMessage = <any>err
+         
+         )
+     }
+  }
+
+  private validate(): void
+  {
     if(new Date(this.Activity.startDate+":00").valueOf()<this.Modulestartdate.valueOf()+1)
     {
         let asd=this.Activity.startDate.valueOf();
@@ -146,6 +171,12 @@ export class EditComponent implements OnInit, OnDestroy {
     {
       this.errorMessage= this.errorMessage +" A module must end after it's start";
     } 
+  }
+
+  public Register(theForm):void
+  {
+    this.errorMessage = "";
+    this.validate();
     if(this.errorMessage=="")
     {
       this.ActivititesService.EditActivity(this.Activity.id,this.Activity)

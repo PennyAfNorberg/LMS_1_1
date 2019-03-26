@@ -75,8 +75,19 @@ export class detailList implements OnInit, OnDestroy {
            this.course.modules.find(m => m.id.toString()==mid).isExpanded=" show";
            this.messhandler.SendModulid(mid);
            let mod=this.course.modules.find(m => m.id.toString()==mid);
-           this.messhandler.SendModulStartDate(mod.startDate);
-           this.messhandler.SendModulEndDate(mod.endDate);
+           let localstart: Date=mod.startDate;
+           localstart=new Date("2019-03-26 16:00:05");
+           if(localstart.getHours()<17)
+           {
+            localstart.setDate(localstart.getDate() - 1);
+           }
+           this.messhandler.SendModulStartDate(localstart);
+           let localend:Date = mod.endDate;
+           if(localend.getHours()>12)
+           {
+            localend.setDate(localend.getDate() + 1);
+           }
+           this.messhandler.SendModulEndDate(localend);
            this.messhandler.SendModulName(mod.name);
            let temp=this.CourseService.getActivitybymodulId(mid)
            .pipe(takeUntil(this.unsubscribe))

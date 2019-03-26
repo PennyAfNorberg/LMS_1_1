@@ -97,9 +97,9 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Activity1/5
-        [HttpPut("{id}")]
+        [HttpPut("Edit/{id}")]
         [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<LMSActivity>> Put(string id, [FromBody] ActivityFormModel activtyVm)
+        public async Task<ActionResult<LMSActivity>> Edit(string id, [FromBody] ActivityFormModel activtyVm)
         {
             //if (editModel.criD==null)
             if (id != activtyVm.Id.ToString())
@@ -140,6 +140,32 @@ namespace LMS_1_1.Controllers
             }
    
             return NoContent();
+        }
+
+        [HttpPut("Move/{id}")]
+        [Authorize(Roles = "Teacher")]
+        public async Task<ActionResult<LMSActivity>> Move(string id, [FromBody]  ActivityFormModel activtyVm)
+        {
+            //if (editModel.criD==null)
+            if (id != activtyVm.Id.ToString())
+            {
+                return BadRequest();
+            }
+
+            //  Guid Crid = new Guid(activtyVm.id);
+            var status= await _programrepository.MoveLMSActivity(activtyVm);
+
+            if(status)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
+
+
+            
         }
 
         // DELETE: api/Activity1/5

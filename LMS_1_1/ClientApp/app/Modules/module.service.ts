@@ -51,7 +51,7 @@ export class ModuleService implements OnDestroy {
     }
 
     EditModule(id: Guid, Module: IModule): any {
-        return this.http.put(this.moduleUrl+ "/Edit" + id, Module,
+        return this.http.put(this.moduleUrl+ "/Edit/" + id, Module,
         {
             headers: this.getAuthHeader()
         }).pipe(
@@ -60,15 +60,6 @@ export class ModuleService implements OnDestroy {
         );
       }
 
-      MoveModule(id: any, Module: any): any {
-        return this.http.put(this.moduleUrl+ "/Move" + id, Module,
-        {
-            headers: this.getAuthHeader()
-        }).pipe(
-            tap(result => JSON.stringify(result)),
-            catchError(this.handleError)
-        );
-      }
     
       GetModule(Moduleid: string):  Observable<IModule>  {
         return this.http.get<IModule>(this.moduleUrl+"/"+Moduleid,

@@ -332,7 +332,7 @@ namespace LMS_1_1.Repository
 
             // update the module
 
-            // get all later modules
+            // get all later modules <-- func
             // update dates
 
             // call MoveActivity but as
@@ -375,11 +375,212 @@ namespace LMS_1_1.Repository
         public async Task<bool> MoveLMSActivity(ActivityFormModel modelVm)
         {
             // Get old LMSActivity
+            
+            var old_Activity = await _ctx.LMSActivity
+                .Where(m => m.Id == modelVm.Id.Value)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
             // set Datediffs
-            // Set Later LMSActivities
+            var diffstart = modelVm.StartDate - old_Activity.StartDate;
+            var diffend = modelVm.EndDate - old_Activity.EndDate;
+            LMSActivity ModActivity = new LMSActivity
+            {
+                Id = modelVm.Id.Value,
+                Name = modelVm.Name,
+                StartDate = modelVm.StartDate,
+                EndDate = modelVm.EndDate,
+                Description = modelVm.Description,
+                ActivityTypeId = modelVm.ActivityTypeId,
+                ModuleId = Guid.Parse(modelVm.moduleid)
+            };
+
+            _ctx.Entry(ModActivity).State = EntityState.Modified;
+
+            try
+            {
+                await _ctx.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ActivityExists(ModActivity.Id))
+                {
+                    return false ;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            if (diffend != TimeSpan.Zero)
+               return await SetLaterActivitesAsync(modelVm, diffstart, diffend);
+           
+            // Set Later LMSActivities  <-- func
+            // incl modules
             return true;
         }
-        
+
+        private async Task<bool> SetLaterActivitesAsync(ActivityFormModel modelVm, TimeSpan diffstart, TimeSpan diffend)
+        {
+            var currmodulid = Guid.Parse(modelVm.moduleid);
+            // first M
+            var firstM = await _ctx.Modules
+                .Where(m => m.Id == currmodulid)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+            var courseid = firstM.CourseId;
+
+            // update first M, just E
+            Module module = new Module
+            {
+                Id = firstM.Id,
+                Name = firstM.Name,
+                StartDate = firstM.StartDate,
+                EndDate = firstM.EndDate + diffend,
+                Description = firstM.Description,
+                CourseId = firstM.CourseId
+            };
+
+            var status= await UpdateModule(module);
+
+            
+            if(status)
+            {
+                // Then All Later A in firstM , start and end
+                var activites = await _ctx.LMSActivity
+                    .Where(a => a.ModuleId == firstM.Id && a.Id != modelVm.Id && a.EndDate >= modelVm.EndDate.Add(diffend))
+                    .AsNoTracking()
+                    .ToListAsync(); 
+                foreach(var activity in activites)
+                {
+                    if (!status) break;
+                    LMSActivity modActivity = new LMSActivity
+                    {
+                        Id = activity.Id,
+                        Name = activity.Name,
+                        StartDate = activity.StartDate + diffend,
+                        EndDate = activity.EndDate + diffend,
+                        Description = activity.Description,
+                        ModuleId = activity.ModuleId,
+                        ActivityTypeId = activity.ActivityTypeId
+                    };
+                    status = await UpdateActivity(modActivity);    
+
+                }
+
+            }
+
+            if (status)
+            { // then foreach later M
+                var modules = await _ctx.Modules
+                    .Where(m => m.CourseId == courseid && m.Id != module.Id && m.EndDate >= module.EndDate.Add(diffend))
+                    .AsNoTracking()
+                    .ToListAsync();
+                foreach (var modul in modules)
+                {
+                    // update M start & end
+                    if (!status) break;
+                    Module edmodule = new Module
+                    {
+                        Id = modul.Id,
+                        Name = modul.Name,
+                        StartDate = modul.StartDate + diffend,
+                        EndDate = modul.EndDate + diffend,
+                        Description = modul.Description,
+                        CourseId = modul.CourseId
+                    };
+
+                    status = await UpdateModule(edmodule);
+                    if(status)
+                    {
+                        var edActivites = await _ctx.LMSActivity
+                            .Where(a => a.ModuleId == edmodule.Id && a.Id != modelVm.Id && a.EndDate >= modelVm.EndDate + diffend)
+                            .AsNoTracking()
+                            .ToListAsync();
+                        foreach (var activity in edActivites)
+                        {
+                            if (!status) break;
+                            LMSActivity modActivity = new LMSActivity
+                            {
+                                Id = activity.Id,
+                                Name = activity.Name,
+                                StartDate = activity.StartDate + diffend,
+                                EndDate = activity.EndDate + diffend,
+                                Description = activity.Description,
+                                ModuleId = activity.ModuleId,
+                                ActivityTypeId = activity.ActivityTypeId
+                            };
+                            status = await UpdateActivity(modActivity);
+
+                        }
+                    }
+                }
+
+            }
+                
+                
+                // update all A start & end
+
+                return status;
+
+        }
+
+        private async Task<bool> UpdateActivity(LMSActivity modActivity)
+        {
+            _ctx.Entry(modActivity).State = EntityState.Modified;
+
+            try
+            {
+                await _ctx.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ActivityExists(modActivity.Id))
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return true;
+        }
+
+        private async Task<bool> UpdateModule(Module module)
+        {
+            _ctx.Entry(module).State = EntityState.Modified;
+
+            try
+            {
+                await _ctx.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ModuleExists(module.Id))
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return true;
+        }
+
+        private bool ModuleExists(Guid id)
+        {
+            return _ctx.Modules.Any(e => e.Id == id);
+        }
+
+        private bool ActivityExists(Guid id)
+        {
+            return _ctx.LMSActivity.Any(e => e.Id == id);
+        }
 
         public async Task<bool> LMSActivityExistsAsync (Guid activityId)
         {

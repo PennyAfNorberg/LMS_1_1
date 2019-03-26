@@ -16,7 +16,7 @@
 
              <div class="form-group">	
                 <label for="startDate" class="control-label">Start Date</label>	
-                <input  type ="datetime-local" [(ngModel)]="Activity.startDate" name="startDate"  [min]="Modulestartdate"	[max]="Moduleenddate"
+                <input  type ="datetime-local" [(ngModel)]="Activity.startDate"  name="startDate"  [min]="Modulestartdate"	[max]="Moduleenddate"
                    id="startDate" class="form-control"   required #startdate="ngModel" (blur)="gotDate()"/>	
                 <div class="text-danger" *ngIf="startDate && startDate.touched && startDate.invalid && startDate.errors.require">Formaterror on startdate  </div>
                 <div class="text-danger" *ngIf="startDate && startDate.touched && startDate < Modulestartdate">May not start before the course</div>
@@ -41,15 +41,17 @@
                 </select>
                 
               </div>
-            <div class="form-group">	
-           <div class="row">
-            <div class="col-6">
-                <input type="submit" class="btn btn-success" value="Register" [disabled]="theForm.invalid" />
-            </div>  
-            <div class="col-6">
-              <a class="btn btn-info" [routerLink]="['/courses', Courseid]" title="Go back"><i class="fa fa-2x fa-arrow-circle-left"></i></a>
-            </div>
-         </div>
+            <div class="form-group">		
+                        <div class="row">
+                 <div class="col-4">
+                    <input type="submit" class="btn btn-success" value="Register" [disabled]="theForm.invalid" />
+                 </div>  
+                 <a class="btn btn-info" (click)="move()" title="Subsequent and underlying">Also Move</a>
+                 <div class="col-4">
+                 <a class="btn btn-info" [routerLink]="['/courses', Courseid]" title="Go back"><i class="fa fa-2x fa-arrow-circle-left"></i></a>
+                 </div>
+              </div>
+ 
            
             </div>	
         </form>	

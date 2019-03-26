@@ -85,10 +85,12 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Module1/5
-        [HttpPut("{id}")]
-        [AcceptVerbs("Edit")]
+       
+        [HttpPut("Edit/{id}")]
+      //  [Route("[action]")]
+      //  [AcceptVerbs("Edit")]
         [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<LMSActivity>>  Put(string id, [FromBody]  ModuleViewModel modelVm)
+        public async Task<ActionResult<LMSActivity>>  Edit(string id, [FromBody]  ModuleViewModel modelVm)
         {
             //if (editModel.criD==null)
             if (id != modelVm.Id.ToString())
@@ -96,10 +98,8 @@ namespace LMS_1_1.Controllers
                 return BadRequest();
             }
             //MoveModule(ModuleViewModel modelVm)
-            _programrepository.MoveModule(modelVm);
+          
             //  Guid Crid = new Guid(activtyVm.id);
-            var diffstart = modelVm.StartDate;
-            var diffend = modelVm.EndDate;
             Module module = new Module
             {
                 Id = Guid.Parse(modelVm.Id),
@@ -132,11 +132,13 @@ namespace LMS_1_1.Controllers
             return NoContent();
         }
 
+        
         // PUT: api/Module1/5
-        [HttpPut("{id}")]
-        [AcceptVerbs("Move")]
+        [HttpPut("Move/{id}")]
+      //  [Route("[action]")]
+        //[AcceptVerbs("Move")]
         [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<LMSActivity>> PutMove(string id, [FromBody]  ModuleViewModel modelVm)
+        public async Task<ActionResult<LMSActivity>> Move(string id, [FromBody]  ModuleViewModel modelVm)
         {
             //if (editModel.criD==null)
             if (id != modelVm.Id.ToString())
@@ -145,7 +147,7 @@ namespace LMS_1_1.Controllers
             }
 
             //  Guid Crid = new Guid(activtyVm.id);
-
+            await _programrepository.MoveModule(modelVm);
             Module module = new Module
             {
                 Id = Guid.Parse(modelVm.Id),
@@ -177,6 +179,7 @@ namespace LMS_1_1.Controllers
 
             return NoContent();
         }
+        
 
         // DELETE: api/module1/5
         [HttpDelete("{id}")]
