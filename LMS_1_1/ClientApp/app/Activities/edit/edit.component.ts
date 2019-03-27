@@ -34,45 +34,64 @@ export class EditComponent implements OnInit, OnDestroy {
     this.messhandler.Modulid
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status => 
+      { 
+        if (status != null) 
+        {
        // let tmpguid= Guid.parse(status); 
-        this.Activity.moduleid=status;
-        this.cd.markForCheck();
-      }
-    )
+          this.Activity.moduleid=status;
+        }
+      this.cd.markForCheck();
+    }
+
+    );
     this.messhandler.Courseid
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status =>{if (status!= null)
+         {
        // let tmpguid= Guid.parse(status); 
         this.Courseid=status;
-        this.cd.markForCheck();
+        
       }
+      this.cd.markForCheck();
+    }
+
     )
 
     this.messhandler.ModulStartDate
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status =>{if (status!= null) 
+        {
         this.Modulestartdate=status;
-        this.cd.markForCheck();
+        
       }
+      this.cd.markForCheck();
+    }
     )
     this.messhandler.ModulEndDate
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status =>{ if(status!= null) 
+      {
         this.Moduleenddate=status;
-        this.cd.markForCheck();
       }
+        this.cd.markForCheck();
+    }
+  
     )
     this.messhandler.ModulName
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
       status => {
+         if(status!= null)
+         {
         this.ModuleName=status;
-        this.cd.markForCheck();
+        
       }
+      this.cd.markForCheck();
+    }
     )
     this.ActivititesService.getActitityTypes()
     .pipe(takeUntil(this.unsubscribe))
