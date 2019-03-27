@@ -280,3 +280,5 @@ __pycache__/
 /LMS_1_1/Attachements/Documents/Kolla in for refreashtoken (6).txt
 /LMS_1_1/Attachements/Documents/Kolla in for refreashtoken (5).txt
 /LMS_1_1/wwwroot/clientapp
+/LMS_1_1/Migrations/20190327165124_IdontLikeThis.cs
+/LMS_1_1/Migrations/20190327165124_IdontLikeThis.Designer.cs
