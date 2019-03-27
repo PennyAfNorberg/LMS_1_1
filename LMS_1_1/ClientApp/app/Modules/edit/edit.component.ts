@@ -79,25 +79,7 @@ export class EditComponent implements OnInit, OnDestroy {
     // post data
   }
 
-   public move(): void
-   {
-      // Send to service => backend add diff date to all later once, change also start timdes to other with thesame start time
-      this.errorMessage = "";
-      this.validate();
-      if(this.errorMessage=="")
-      {
-        this.ModuleService.MoveModule(this.Module.id,this.Module )
-        .pipe(takeUntil(this.unsubscribe))
-        .subscribe( status =>
-          {
-            this.errorMessage="Module updated"
-            this.cd.markForCheck();
-          }
-          ,err =>  this.errorMessage = <any>err
-          
-          )
-      }
-   }
+
 
 private validate():void
 {

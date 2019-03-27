@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using LMS_1_1.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace LMS_1_1.Repository
 {
@@ -166,8 +167,9 @@ namespace LMS_1_1.Repository
             DateTime dt1 = DateTime.Parse(coursedata.StartDate.ToShortDateString());
 
             int noOfDays = (int)dt.Subtract(dt1).TotalDays; // dates to add
-
-
+    
+            // fix skip weekends
+            // But not here, since it's choosed
             var tmpcourse = new Course
             {
 
@@ -188,16 +190,25 @@ namespace LMS_1_1.Repository
                     Alldocclones[i].NewCourseId = cloneFormModel.NewCourseId;
                 }
             }
+            DateTime tempstart, tempend;
 
             foreach (var mod in coursedata.Modules.Where(m => m.CourseId == Guid.Parse(cloneFormModel.Id)))
             {
+
+                tempstart = mod.StartDate.AddDays(noOfDays);
+                tempend = mod.EndDate.AddDays(noOfDays);
+                if(cloneFormModel.CloneTypeId==1)
+                {
+                    tempstart = skipWeekEnd(tempstart);
+                    tempend = skipWeekEnd(tempend);
+                }
 
                 Module tmp2 = new Module
                 {
                     Name = mod.Name,
                     Description = mod.Description,
-                    StartDate = mod.StartDate.AddDays(noOfDays),
-                    EndDate = mod.EndDate.AddDays(noOfDays),
+                    StartDate = tempstart,
+                    EndDate = tempend,
                     CourseId = cloneFormModel.NewCourseId.Value
                 };
 
@@ -218,13 +229,21 @@ namespace LMS_1_1.Repository
                 //  foreach (var act in _ctx.LMSActivity.Where(m => m.ModuleId == mod.Id))
                 foreach (var act in coursedata.Modules.Where(m => m.Id == mod.Id).Select(m => m.LMSActivities).FirstOrDefault())
                 {
+                    tempstart = act.StartDate.AddDays(noOfDays);
+                    tempend = act.EndDate.AddDays(noOfDays);
+                    if (cloneFormModel.CloneTypeId == 1)
+                    {
+                        tempstart = skipWeekEnd(tempstart);
+                        tempend = skipWeekEnd(tempend);
+                    }
+
 
                     LMSActivity tmpact = new LMSActivity
                     {
                         Name = act.Name,
                         Description = act.Description,
-                        StartDate = act.StartDate.AddDays(noOfDays),
-                        EndDate = act.EndDate.AddDays(noOfDays),
+                        StartDate = tempstart,
+                        EndDate = tempend,
                         ActivityTypeId = act.ActivityTypeId,
                         ModuleId = tmp2.Id
                     };
@@ -273,6 +292,14 @@ namespace LMS_1_1.Repository
             return new Course();
         }
 
+        private DateTime skipWeekEnd(DateTime start)
+        {
+            if (start.DayOfWeek == DayOfWeek.Saturday || start.DayOfWeek == DayOfWeek.Sunday)
+            {
+                return start.AddDays(2);
+            }
+            return start;
+        }
 
         public async Task<bool> CourseExistsAsync(Guid courseId)
         {
@@ -332,7 +359,7 @@ namespace LMS_1_1.Repository
 
             // update the module
 
-            // get all later modules
+            // get all later modules <-- func
             // update dates
 
             // call MoveActivity but as
@@ -372,14 +399,281 @@ namespace LMS_1_1.Repository
             return await _DocumentRepository.RemoveDocumentRangeAsync(docActivity.ToList());
         }
 
+        public struct YearAndDate
+        {
+            public int Year { get; set; }
+            public int Week { get; set; }
+        }
+
+         private YearAndDate GetWeeknrAndYear(DateTime d)
+        {
+            var YearAndDate = new YearAndDate();
+            CultureInfo cul = CultureInfo.CurrentCulture;
+
+            var firstDayWeek = cul.Calendar.GetWeekOfYear(
+                d,
+                CalendarWeekRule.FirstDay,
+                DayOfWeek.Monday);
+
+            YearAndDate.Week = cul.Calendar.GetWeekOfYear(
+                d,
+                CalendarWeekRule.FirstDay,
+                DayOfWeek.Monday);
+            YearAndDate.Year = d.Year;
+
+            return YearAndDate;
+        }
+
+        private int DiffWeekends(YearAndDate yearAndDate1, YearAndDate yearAndDate2)
+        {
+            return (yearAndDate1.Year - yearAndDate2.Year) * 52 + yearAndDate1.Week - yearAndDate2.Week;
+        }
+
         public async Task<bool> MoveLMSActivity(ActivityFormModel modelVm)
         {
             // Get old LMSActivity
+            
+            var old_Activity = await _ctx.LMSActivity
+                .Where(m => m.Id == modelVm.Id.Value)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
             // set Datediffs
-            // Set Later LMSActivities
+            var diffstart = modelVm.StartDate - old_Activity.StartDate;
+            var diffend = modelVm.EndDate - old_Activity.EndDate;
+
+
+            int diffweeks = DiffWeekends(GetWeeknrAndYear(modelVm.EndDate), GetWeeknrAndYear(old_Activity.EndDate));
+            LMSActivity ModActivity = new LMSActivity
+            {
+                Id = modelVm.Id.Value,
+                Name = modelVm.Name,
+                StartDate = modelVm.StartDate,
+                EndDate = modelVm.EndDate,
+                Description = modelVm.Description,
+                ActivityTypeId = modelVm.ActivityTypeId,
+                ModuleId = Guid.Parse(modelVm.moduleid)
+            };
+
+            _ctx.Entry(ModActivity).State = EntityState.Modified;
+
+            try
+            {
+                await _ctx.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ActivityExists(ModActivity.Id))
+                {
+                    return false ;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            if (diffend != TimeSpan.Zero)
+               return await SetLaterActivitesAsync(modelVm, diffstart, diffend, diffweeks);
+           
+            // Set Later LMSActivities  <-- func
+            // incl modules
             return true;
         }
-        
+
+
+
+        private async Task<bool> SetLaterActivitesAsync(ActivityFormModel modelVm, TimeSpan diffstart, TimeSpan diffend,int diffweeks)
+        {
+            var currmodulid = Guid.Parse(modelVm.moduleid);
+            // first M
+            var firstM = await _ctx.Modules
+                .Where(m => m.Id == currmodulid)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+            var courseid = firstM.CourseId;
+            DateTime Workstart = firstM.StartDate;
+            DateTime WorkEnd = firstM.EndDate + diffend;
+            int diffweeksres= DiffWeekends(GetWeeknrAndYear(WorkEnd), GetWeeknrAndYear(firstM.EndDate))- diffweeks;
+            if(WorkEnd.DayOfWeek==DayOfWeek.Saturday || WorkEnd.DayOfWeek==DayOfWeek.Sunday)
+            {
+                diffweeksres++;
+            }
+            WorkEnd += TimeSpan.FromDays(2*diffweeksres)  ;
+            // update first M, just E
+            Module module = new Module
+            {
+                Id = firstM.Id,
+                Name = firstM.Name,
+                StartDate = Workstart,
+                EndDate = WorkEnd,
+                Description = firstM.Description,
+                CourseId = firstM.CourseId
+            };
+
+            var status= await UpdateModule(module);
+
+            
+            if(status)
+            {
+                // Then All Later A in firstM , start and end
+                var activites = await _ctx.LMSActivity
+                    .Where(a => a.ModuleId == firstM.Id && a.Id != modelVm.Id && a.EndDate >= modelVm.EndDate.Add(diffend))
+                    .AsNoTracking()
+                    .ToListAsync(); 
+                foreach(var activity in activites)
+                {
+                    if (!status) break;
+                    GetStartAndEnd(diffend, out Workstart, out WorkEnd, diffweeks, activity.StartDate, activity.EndDate);
+
+                    LMSActivity modActivity = new LMSActivity
+                    {
+                        Id = activity.Id,
+                        Name = activity.Name,
+                        StartDate = Workstart,
+                        EndDate = WorkEnd,
+                        Description = activity.Description,
+                        ModuleId = activity.ModuleId,
+                        ActivityTypeId = activity.ActivityTypeId
+                    };
+                    status = await UpdateActivity(modActivity);
+
+                }
+
+            }
+
+            if (status)
+            { // then foreach later M
+                var modules = await _ctx.Modules
+                    .Where(m => m.CourseId == courseid && m.Id != module.Id && m.EndDate >= module.EndDate.Add(diffend))
+                    .AsNoTracking()
+                    .ToListAsync();
+                foreach (var modul in modules)
+                {
+                    // update M start & end
+                    if (!status) break;
+
+                    GetStartAndEnd(diffend, out Workstart, out WorkEnd,  diffweeks, modul.StartDate, modul.EndDate);
+                    Module edmodule = new Module
+                    {
+                        Id = modul.Id,
+                        Name = modul.Name,
+                        StartDate = Workstart,
+                        EndDate = WorkEnd,
+                        Description = modul.Description,
+                        CourseId = modul.CourseId
+                    };
+
+                    status = await UpdateModule(edmodule);
+                    if(status)
+                    {
+                        var edActivites = await _ctx.LMSActivity
+                            .Where(a => a.ModuleId == edmodule.Id && a.Id != modelVm.Id && a.EndDate >= module.EndDate.Add(diffend))
+                            .AsNoTracking()
+                            .ToListAsync();
+                        foreach (var activity in edActivites)
+                        {
+                            if (!status) break;
+                            GetStartAndEnd(diffend, out Workstart, out WorkEnd,  diffweeks, activity.StartDate, activity.EndDate);
+                            LMSActivity modActivity = new LMSActivity
+                            {
+                                Id = activity.Id,
+                                Name = activity.Name,
+                                StartDate = Workstart,
+                                EndDate = WorkEnd,
+                                Description = activity.Description,
+                                ModuleId = activity.ModuleId,
+                                ActivityTypeId = activity.ActivityTypeId
+                            };
+                            status = await UpdateActivity(modActivity);
+
+                        }
+                    }
+                }
+
+            }
+                
+                
+                // update all A start & end
+
+                return status;
+
+        }
+
+        private void GetStartAndEnd(TimeSpan diffend, out DateTime Workstart, out DateTime WorkEnd, int diffweeksres, DateTime startDate, DateTime endDate)
+        {
+            
+            Workstart = startDate + diffend;
+            WorkEnd = endDate + diffend;
+            int diffweeksresend = DiffWeekends(GetWeeknrAndYear(WorkEnd), GetWeeknrAndYear(endDate))- diffweeksres;
+            int diffweeksresstart = DiffWeekends(GetWeeknrAndYear(Workstart), GetWeeknrAndYear(startDate)) - diffweeksres;
+            if(Workstart.DayOfWeek==DayOfWeek.Saturday || Workstart.DayOfWeek==DayOfWeek.Sunday)
+            {
+                diffweeksresstart++;
+            }
+            if (WorkEnd.DayOfWeek == DayOfWeek.Saturday || WorkEnd.DayOfWeek == DayOfWeek.Sunday)
+            {
+                diffweeksresend++;
+            }
+            Workstart += TimeSpan.FromDays(2 * diffweeksresstart);
+            WorkEnd += TimeSpan.FromDays(2 * diffweeksresend);
+        }
+
+        private async Task<bool> UpdateActivity(LMSActivity modActivity)
+        {
+            _ctx.Entry(modActivity).State = EntityState.Modified;
+
+            try
+            {
+                await _ctx.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ActivityExists(modActivity.Id))
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return true;
+        }
+
+        private async Task<bool> UpdateModule(Module module)
+        {
+            _ctx.Entry(module).State = EntityState.Modified;
+
+            try
+            {
+                await _ctx.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ModuleExists(module.Id))
+                {
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return true;
+        }
+
+        private bool ModuleExists(Guid id)
+        {
+            return _ctx.Modules.Any(e => e.Id == id);
+        }
+
+        private bool ActivityExists(Guid id)
+        {
+            return _ctx.LMSActivity.Any(e => e.Id == id);
+        }
 
         public async Task<bool> LMSActivityExistsAsync (Guid activityId)
         {

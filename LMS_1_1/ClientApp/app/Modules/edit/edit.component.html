@@ -36,16 +36,15 @@
             
 
              </div>	
-            <div class="form-group">	
-                      <div class="row">
-               <div class="col-4">
-                  <input type="submit" class="btn btn-success" value="Register" [disabled]="theForm.invalid" />
-               </div>  
-               <a class="btn btn-info" (click)="move()" title="Subsequent and underlying">Subsequent and underlying</a>
-               <div class="col-4">
-               <a class="btn btn-info" [routerLink]="['/Modules', Module.id]" title="Go back"><i class="fa fa-2x fa-arrow-circle-left"></i></a>
+             <div class="form-group">	
+             <div class="row">
+                  <div class="col-6">
+                      <input type="submit" class="btn btn-success" value="Register" [disabled]="theForm.invalid" />
+                  </div>  
+                  <div class="col-6">
+                    <a class="btn btn-info" [routerLink]="['/Modules', Module.id]" title="Go back"><i class="fa fa-2x fa-arrow-circle-left"></i></a>
+                  </div>
                </div>
-            </div>
             
             </div>	
         </form>	

@@ -9,6 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { PartipantService } from 'ClientApp/app/AddPartipant/partipant.service';
 import { LoginMessageHandlerService } from 'ClientApp/app/Login/login-message-handler.service';
 
+
 @Component({
  
   templateUrl: './course-detail.component.html',

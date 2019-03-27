@@ -13,7 +13,8 @@ namespace LMS_1_1.ViewModels
         public DateTime NewDate { get; set; }
         public string Description { get; set; }
         public IFormFile FileData { get; set; }
-    
+
+        public int CloneTypeId { get; set; }
         public Guid? NewCourseId { get; set; }
     }
 

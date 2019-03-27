@@ -19,6 +19,7 @@ import { AngularFontAwesomeModule } from 'angular-font-awesome';
 import { UploadComponent } from '../documents/upload/upload.component';
 import { DocumentsModule } from '../documents/documents.module';
 import { CloneComponent } from './clone/clone.component';
+import { ScheduleModule } from '../Schedule/schedule.module';
 
 
 @NgModule({
@@ -31,8 +32,6 @@ import { CloneComponent } from './clone/clone.component';
         CourseEditComponent,
         detailList,
         CloneComponent,
-      
-
     ],
   imports: [
       CommonModule,
@@ -41,6 +40,7 @@ import { CloneComponent } from './clone/clone.component';
       AngularFontAwesomeModule,
       DocumentsModule,
       SharedModule,
+      ScheduleModule,
       RouterModule.forChild(
           [{
               path: 'courses' 
