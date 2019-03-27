@@ -36,7 +36,7 @@
              </div>
              <div class="form-group">
                 <label for="ActitivtyType" class="control-label">Actitivty Type</label>
-                <select class="form-control" id="role" [(ngModel)]="Activity.activityTypeId" name="ActivityTypeId" required #activitytype="ngModel" >
+                <select class="form-control" id="Activity.activityTypeId" [(ngModel)]="Activity.activityTypeId" name="ActivityTypeId" required #activitytype="ngModel" >
                    <option *ngFor="let ActivityType of ActivityTypes" [value]="ActivityType.id">{{ActivityType.name}}</option>                                    
                 </select>
                 

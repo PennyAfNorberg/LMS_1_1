@@ -60,10 +60,12 @@
             <div class="form-group" [ngClass]="{ 'has-error': isSubmitted && formControls.fileData.errors }">
                 <label for="fileData" class="control-label">File</label>
                 <input type="file" #fileInput  formControlName="fileData" accept='image/*' (change)="preview(fileInput.files)" name="fileData" class="form-control" />
-
-
-
-            </div>
+         </div>
+            <div class="form-group">
+                <select formControlName="clonetypeid" class="form-control" name="clonetype">
+                        <option *ngFor="let cloneType of cloneTypes" [value]="cloneType.id">{{cloneType.name}}</option> 
+                </select>
+                </div>  
             <div class="form-group">
                 <div class="row">
                     <div class="col-6">

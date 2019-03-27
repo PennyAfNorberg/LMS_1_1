@@ -43,6 +43,12 @@ namespace LMS_1_1.Data
         new ActivityType { Id = 3, Name = "Module" }
     );
 
+            modelBuilder.Entity<CloneType>()
+.HasData(
+new ActivityType { Id = 1, Name = "Skip weekends" },
+new ActivityType { Id = 2, Name = "don't skip weekends" }
+
+);
         }
 
 
@@ -58,6 +64,7 @@ namespace LMS_1_1.Data
         public DbSet<TokenUser> TokenUsers { get; set; }
 
         public DbSet<Document> Documents { get; set; }
+        public DbSet<CloneType> CloneTypes { get; set; }
 
         public DbSet<DocumentType> DocumentTypes { get; set; }
 

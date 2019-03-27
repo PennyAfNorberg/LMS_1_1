@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { CloneCourseModel, course } from '../course';
+import { CloneCourseModel, course, CloneType } from '../course';
 import { CourseService } from '../course.service';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,6 +26,7 @@ export class CloneComponent implements OnInit, OnDestroy {
   @ViewChild("fileInput") fileInputVariable: any;
   showMsg: boolean = false;
   courseForm: FormGroup;
+  cloneTypes: CloneType[]=[];
   constructor(private route: ActivatedRoute, private cd: ChangeDetectorRef , private router: Router
    , private CourseService: CourseService, private AuthService: AuthService) { }
 
@@ -36,9 +37,19 @@ export class CloneComponent implements OnInit, OnDestroy {
      name: new FormControl('', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]),
      startDate: new FormControl('', [Validators.required, Validators.minLength(10), Validators.maxLength(200)]),
      description: new FormControl('', [Validators.required]),
-     fileData: new FormControl('', [ mimeTypeValidator()])
+     fileData: new FormControl('', [ mimeTypeValidator()]),
+     clonetypeid: new FormControl('1', [Validators.required])
 
  });
+    this.CourseService.GetCloneTypes()
+    .pipe(takeUntil(this.unsubscribe))
+    .subscribe(
+      res =>
+      {
+        this.cloneTypes=res;
+        this.cd.markForCheck();
+      });
+      
     this.CourseService.getCourseById(this.Courseid)
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
@@ -98,6 +109,7 @@ register() {
     formData.append('Name', this.courseForm.value.name);
     formData.append('newDate', this.courseForm.value.startDate);
     formData.append('Description', this.courseForm.value.description);
+    formData.append('clonetypeid', this.courseForm.value.clonetypeid);
     formData.append('FileData', fileToUpload);
     console.log(formData);
     this.CourseService.cloneCourse(formData)

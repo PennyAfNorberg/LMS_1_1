@@ -148,11 +148,12 @@ export class EditComponent implements OnInit, OnDestroy {
      // Send to service => backend add diff date to all later once, change also start timdes to other with thesame start time
      this.errorMessage = "";
      this.validate();
-     if (this.startstartdate!=this.Activity.startDate )
-       this.errorMessage=this.errorMessage+" Startdate change don't apply too move, inorder to move this start date move the previus entity instead";
-    
+
      if(this.errorMessage=="")
      {
+      if (this.startstartdate!=this.Activity.startDate )
+      this.errorMessage=this.errorMessage+" Startdate change don't apply too move neighbor, however it will update this activity";
+   
        this.ActivititesService.MoveActivity(this.Activity.id,this.Activity )
        .pipe(takeUntil(this.unsubscribe))
        .subscribe( status =>

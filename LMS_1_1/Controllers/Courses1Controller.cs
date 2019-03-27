@@ -297,6 +297,11 @@ namespace LMS_1_1.Controllers
 
             return Ok(Module1);
         }
+        [HttpGet("CloneTypes")]
+        public async Task<ActionResult<IEnumerable<CloneType>>> GetCloneTypes()
+        {
+            return await _context.CloneTypes.ToArrayAsync();
+        }
 
         [HttpPost("Clone"), DisableRequestSizeLimit]
         [Authorize(Roles = "Teacher")]

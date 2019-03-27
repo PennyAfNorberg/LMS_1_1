@@ -16,6 +16,7 @@ import {  LoginComponent} from './Login/Login/login.component';
 import { AngularFontAwesomeModule } from 'angular-font-awesome';
 import { CourseListComponent } from './Courses/course-list/course-list.component';
 import { ActivitiesModule } from './Activities/activities.module';
+import { ScheduleModule } from './Schedule/schedule.module';
 //import { LoginpartialComponent } from './Login/LoginPartial/loginpartial.component';
 
 
@@ -58,7 +59,8 @@ export function tokenGetter() {
       LoginModule,
       ModulesModule,
       ActivitiesModule,
-      AngularFontAwesomeModule
+      AngularFontAwesomeModule,
+      ScheduleModule
    
   ],
   providers: [],

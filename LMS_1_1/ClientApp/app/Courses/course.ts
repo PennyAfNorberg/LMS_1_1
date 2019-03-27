@@ -97,5 +97,12 @@ export interface IActivityType
     newCourseId?:Guid=null;
     courseImgPath: string="";
  }
+
+  export class CloneType
+  {
+    id:number=0;
+    name:string="";
+
+  }
 //it is also possible to define course class that implement the Icourse interface
 //when needed
