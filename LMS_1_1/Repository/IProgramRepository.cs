@@ -12,19 +12,25 @@ namespace LMS_1_1.Repository
     {
 
         Task<IEnumerable<Course>> GetAllCoursesAsync (bool includeModule);
-        Task<Course> GetCourseByIdAsync (Guid courseId, bool includeModule);
+        Task<Course> GetCourseByIdAsync (Guid courseId);
+        Task<CourseAllViewModel> GetCourseByIdAllAsync(Guid courseId);
+        Task<CourseAllViewModel> GetCourseAndModule(Guid courseId);
+
         Task<bool> CourseExistsAsync (Guid id);
         /* Course FindCourseById (string courseId);*/
         string GetCourseImageUploadPath ();
 
         Task<IEnumerable<Module>> GetAllModulesAsync (bool includeActivities);
         Task<Module> GetModuleByIdAsync (Guid moduleId, bool includeActivity);
+
+        Task<ModelAllViewModel> GetModulesAndActivitiesFromModulid(Guid moduleId);
         Task<bool> ModuleExistsAsync (Guid id);
         Task<IEnumerable<Course>> GetCoursesForUserAsync(string userid);
 
 
         Task<IEnumerable<LMSActivity>> GetAllActivitiesAsync ();
         Task<LMSActivity> GetActivityByIdAsync (Guid activityId);
+        Task<ICollection<ActivityViewModel>> GetActivitiesFromModulid(Guid moduleId);
         Task<bool> LMSActivityExistsAsync (Guid id);
         Task<bool> MoveLMSActivity(ActivityFormModel modelVm);
 
@@ -46,5 +52,7 @@ namespace LMS_1_1.Repository
         void UpdateEntity (object model);
         void RemoveEntity (object model);
         Task<Course> CloneCourseAsync(CloneFormModel cloneFormModel, string userid);
+        Task<List<ScheduleViewModel>[]> GetModulesWithColour(ScheduleFormModel scheduleFormModel,string userid);
+        Task<List<ScheduleViewModel>[]> GetActivitiesWithColour(ScheduleFormModel scheduleFormModel, string userid);
     }
 }

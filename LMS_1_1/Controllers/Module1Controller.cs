@@ -47,7 +47,7 @@ namespace LMS_1_1.Controllers
 
         // GET: api/Module1/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Module>> GetModuleById(string id)
         {
             Guid idG = Guid.Parse(id);
@@ -63,7 +63,7 @@ namespace LMS_1_1.Controllers
         }
         // POST: api/Module1
         [HttpPost("PostModule")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Module>> PostModule([FromBody] ModuleViewModel modelVm)
         {
             if (!ModelState.IsValid)
@@ -87,9 +87,7 @@ namespace LMS_1_1.Controllers
         // PUT: api/Module1/5
        
         [HttpPut("Edit/{id}")]
-      //  [Route("[action]")]
-      //  [AcceptVerbs("Edit")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<LMSActivity>>  Edit(string id, [FromBody]  ModuleViewModel modelVm)
         {
             //if (editModel.criD==null)
@@ -135,9 +133,7 @@ namespace LMS_1_1.Controllers
         
         // PUT: api/Module1/5
         [HttpPut("Move/{id}")]
-      //  [Route("[action]")]
-        //[AcceptVerbs("Move")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<LMSActivity>> Move(string id, [FromBody]  ModuleViewModel modelVm)
         {
             //if (editModel.criD==null)
@@ -183,7 +179,7 @@ namespace LMS_1_1.Controllers
 
         // DELETE: api/module1/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<bool>>  Delete(Guid iD)
         {
             var status = await _programrepository.RemoveModuleHelperAsync(iD);

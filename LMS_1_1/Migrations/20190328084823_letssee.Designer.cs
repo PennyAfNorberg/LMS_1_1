@@ -4,14 +4,16 @@ using LMS_1_1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LMS_1_1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190328084823_letssee")]
+    partial class letssee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,93 +86,6 @@ namespace LMS_1_1.Migrations
                         });
                 });
 
-            modelBuilder.Entity("LMS_1_1.Models.ColorActivity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int?>("AktivityTypeID");
-
-                    b.Property<string>("Color")
-                        .IsRequired();
-
-                    b.Property<Guid?>("CourseId");
-
-                    b.Property<Guid?>("LMSActivityId");
-
-                    b.Property<string>("LMSUserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("LMSActivityId");
-
-                    b.HasIndex("LMSUserId");
-
-                    b.ToTable("ColorActivity");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("cdd4f0c6-d395-4194-b2f8-e69b8a01c57e"),
-                            AktivityTypeID = 1,
-                            Color = "#587aad"
-                        },
-                        new
-                        {
-                            Id = new Guid("724a0244-c183-446e-8a96-60ca91d8aac3"),
-                            AktivityTypeID = 2,
-                            Color = "#68c930"
-                        },
-                        new
-                        {
-                            Id = new Guid("e050874b-27af-4870-8c2b-04e989081a5e"),
-                            AktivityTypeID = 3,
-                            Color = "#c95e30"
-                        },
-                        new
-                        {
-                            Id = new Guid("e61ff4dd-7ac6-4e86-a1e8-fd84d09f46ac"),
-                            AktivityTypeID = 4,
-                            Color = "#f45004"
-                        },
-                        new
-                        {
-                            Id = new Guid("3583af22-9b65-4420-865c-fa2ac9cd724b"),
-                            AktivityTypeID = 5,
-                            Color = "#fcfaf9"
-                        });
-                });
-
-            modelBuilder.Entity("LMS_1_1.Models.ColorModule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Color")
-                        .IsRequired();
-
-                    b.Property<string>("LMSUserId");
-
-                    b.Property<Guid?>("ModuleId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LMSUserId");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("ColorModule");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("8b8f0562-90d2-498d-b9b5-796f5486d5ba"),
-                            Color = "#dbad95"
-                        });
-                });
-
             modelBuilder.Entity("LMS_1_1.Models.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -189,40 +104,6 @@ namespace LMS_1_1.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
-                });
-
-            modelBuilder.Entity("LMS_1_1.Models.CourseSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<Guid?>("CourseId");
-
-                    b.Property<DateTime?>("Date");
-
-                    b.Property<string>("EndLunch");
-
-                    b.Property<string>("EndTime");
-
-                    b.Property<string>("StartLunch");
-
-                    b.Property<string>("StartTime");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("CourseSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("3c2db520-45da-4775-827e-7bb03fa17aaf"),
-                            EndLunch = "13:00:00",
-                            EndTime = "17:00:00",
-                            StartLunch = "12:00:00",
-                            StartTime = "09:00:00"
-                        });
                 });
 
             modelBuilder.Entity("LMS_1_1.Models.CourseUser", b =>
@@ -542,39 +423,6 @@ namespace LMS_1_1.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("LMS_1_1.Models.ColorActivity", b =>
-                {
-                    b.HasOne("LMS_1_1.Models.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId");
-
-                    b.HasOne("LMS_1_1.Models.LMSActivity", "LMSActivity")
-                        .WithMany()
-                        .HasForeignKey("LMSActivityId");
-
-                    b.HasOne("LMS_1_1.Models.LMSUser", "LMSUser")
-                        .WithMany()
-                        .HasForeignKey("LMSUserId");
-                });
-
-            modelBuilder.Entity("LMS_1_1.Models.ColorModule", b =>
-                {
-                    b.HasOne("LMS_1_1.Models.LMSUser", "LMSUser")
-                        .WithMany()
-                        .HasForeignKey("LMSUserId");
-
-                    b.HasOne("LMS_1_1.Models.Module", "Module")
-                        .WithMany()
-                        .HasForeignKey("ModuleId");
-                });
-
-            modelBuilder.Entity("LMS_1_1.Models.CourseSettings", b =>
-                {
-                    b.HasOne("LMS_1_1.Models.Course", "Course")
-                        .WithMany()
-                        .HasForeignKey("CourseId");
                 });
 
             modelBuilder.Entity("LMS_1_1.Models.CourseUser", b =>

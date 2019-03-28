@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CourseService } from '../Courses/course.service';
 import { takeUntil } from 'rxjs/operators';
 import { Scheduleentites, weekdays } from './Scheduleentites';
+import { Activity,Module } from '../Courses/course';
 
 @Component({
   selector: 'app-schedule',
@@ -108,6 +109,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
    // if all pars send q
 
   }
+
+   private mapActivites(Activities : Activity[])
+   {
+     // needs act + color + scale
+
+   }
+   private mapModules(Modules : Module[])
+   {
+
+   }  
 
   private getWeekNumber(d:any):any {
     // Copy date so don't modify original

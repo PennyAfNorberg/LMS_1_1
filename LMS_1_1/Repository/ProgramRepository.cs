@@ -36,6 +36,15 @@ namespace LMS_1_1.Repository
             _environment = environment;
             _DocumentRepository = DocumentRepository;
             // _roleManager = roleManager;
+            /*start for debug */
+            var data = new ScheduleFormModel
+            {
+                CourseId = "fd26f900-0d75-4ba9-fbdb-08d6b2b4aba9",
+                StartTime = DateTime.Parse("2019-03-25 00:00:01"),
+                EndTime = DateTime.Parse("2019-03-31 23:59:59")
+            };
+            string userid = "f5608d74-bc13-4325-b2bd-c0db27b69206";
+            GetActivitiesWithColour(data, userid).Wait();
         }
         #region Commen
         public async Task AddEntityAsync(object model)
@@ -90,23 +99,121 @@ namespace LMS_1_1.Repository
 
 
 
-        public async Task<Course> GetCourseByIdAsync(Guid courseId, bool includeModule)
+        public async Task<Course> GetCourseByIdAsync(Guid courseId)
         {
             var course = _ctx.Courses
                .Where(c => c.Id == courseId);
 
-            if (includeModule)
-            {
-                var res = await course
-                          .Include(c => c.Modules)
-                          .ThenInclude(m => m.LMSActivities)
-                          .ThenInclude(a => a.ActivityType)
-                           .FirstOrDefaultAsync();
-                return res;
-            }
+
             return await course
                    .FirstOrDefaultAsync();
 
+        }
+
+        public async Task<CourseAllViewModel> GetCourseByIdAllAsync(Guid courseId)
+        {
+            var course1 = await _ctx.Courses
+                                      .Include(c => c.Modules)
+                                      .ThenInclude(m => m.LMSActivities)
+                                      .ThenInclude(a => a.ActivityType)
+                                      .FirstOrDefaultAsync(c => c.Id == courseId);
+
+
+
+            var Modules = new List<ModelAllViewModel>();
+            foreach (var Modul in course1.Modules)
+            {
+                var Activities = new List<ActivityViewModel>();
+                foreach (var Actitivity in Modul.LMSActivities)
+                {
+                    Activities.Add(
+                            new ActivityViewModel
+                            {
+                                Id = Actitivity.Id,
+                                Name = Actitivity.Name,
+                                StartDate = Actitivity.StartDate,
+                                EndDate = Actitivity.EndDate,
+                                Description = Actitivity.Description,
+                                ActivityType = Actitivity.ActivityType.Name,
+                                Name2 = (Guid.NewGuid()).ToString(),
+                                isExpanded = ""
+
+                            }
+
+                        );
+                }
+
+                Modules.Add(
+                     new ModelAllViewModel
+                     {
+                         Id = Modul.Id,
+                         Name = Modul.Name,
+                         StartDate = Modul.StartDate,
+                         EndDate = Modul.EndDate,
+                         Description = Modul.Description,
+                         Activities = (ICollection<ActivityViewModel>)Activities,
+                         Name2 = (Guid.NewGuid()).ToString(),
+                         // Name2 = "C" + (i++).ToString(),
+                         isExpanded = ""
+                     }
+                    );
+            }
+
+            CourseAllViewModel course = new CourseAllViewModel
+            {
+                Id = course1.Id,
+                Name = course1.Name,
+                StartDate = course1.StartDate,
+                Description = course1.Description,
+                courseImgPath = course1.CourseImgPath,
+                Modules = Modules
+            };
+
+
+
+            return course;
+
+        }
+         public async Task<CourseAllViewModel> GetCourseAndModule(Guid courseId)
+        {
+            var course1 = await _ctx.Courses
+                          .Include(c => c.Modules)
+                          .FirstOrDefaultAsync(c => c.Id == courseId);
+
+
+
+            var Modules = new List<ModelAllViewModel>();
+            foreach (var Modul in course1.Modules)
+            {
+
+
+                Modules.Add(
+                     new ModelAllViewModel
+                     {
+                         Id = Modul.Id,
+                         Name = Modul.Name,
+                         StartDate = Modul.StartDate,
+                         EndDate = Modul.EndDate,
+                         Description = Modul.Description,
+                         Activities = null,
+                         Name2 = (Guid.NewGuid()).ToString(),
+                         // Name2 = "C" + (i++).ToString(),
+                         isExpanded = ""
+                     }
+                    );
+            }
+
+            CourseAllViewModel course = new CourseAllViewModel
+            {
+                Id = course1.Id,
+                Name = course1.Name,
+                StartDate = course1.StartDate,
+                Description = course1.Description,
+                courseImgPath = course1.CourseImgPath,
+                Modules = Modules
+            };
+
+            return course;
         }
 
         public async Task<IEnumerable<Course>> GetCoursesForUserAsync(string userid)
@@ -182,7 +289,21 @@ namespace LMS_1_1.Repository
             await _ctx.Courses.AddRangeAsync(tmpcourse);
             _ctx.SaveChanges();
             cloneFormModel.NewCourseId = tmpcourse.Id;
-
+            // clone settings if any
+            var css= _ctx.CourseSettings.Where(cs => cs.CourseId.Value.ToString() == cloneFormModel.Id && cs.Date == null).FirstOrDefault();
+            if(css!=null)
+            {
+                var ncs = new CourseSettings
+                {
+                    CourseId = cloneFormModel.NewCourseId,
+                    StartTime = css.StartTime,
+                    StartLunch = css.StartLunch,
+                    EndLunch = css.EndLunch,
+                    EndTime = css.EndTime
+                };
+                await _ctx.CourseSettings.AddRangeAsync(ncs);
+                _ctx.SaveChanges();
+            }
             for (int i = 0; i < Alldocclones.Count(); i++)
             {
                 if (Alldocclones[i].CourseId == Guid.Parse(cloneFormModel.Id))
@@ -343,6 +464,131 @@ namespace LMS_1_1.Repository
             }
         }
 
+        public async Task<ModelAllViewModel> GetModulesAndActivitiesFromModulid(Guid moduleId)
+        {
+            var Module = await _ctx.Modules
+                            .Include(m => m.LMSActivities)
+                           .ThenInclude(a => a.ActivityType)
+                          .Where(m => m.Id == moduleId)
+                          .FirstOrDefaultAsync();
+
+
+
+
+            var res = new List<ActivityViewModel>();
+            foreach (var activity in Module.LMSActivities)
+            {
+
+
+                res.Add(
+                     new ActivityViewModel
+                     {
+                         Id = activity.Id,
+                         Name = activity.Name,
+                         StartDate = activity.StartDate,
+                         EndDate = activity.EndDate,
+                         Description = activity.Description,
+                         ActivityType = activity.ActivityType.Name,
+                         Name2 = (Guid.NewGuid()).ToString(),
+                         isExpanded = ""
+                     }
+                    );
+            }
+
+
+            ModelAllViewModel Module1 = new ModelAllViewModel
+            {
+                Id = Module.Id,
+                Name = Module.Name,
+                StartDate = Module.StartDate,
+                EndDate = Module.EndDate,
+                Description = Module.Description,
+                Activities = res,
+                CourseId = Module.CourseId
+            };
+            return Module1;
+        }
+
+        public async Task<List<ScheduleViewModel>[]> GetModulesWithColour(ScheduleFormModel scheduleFormModel, string userid)
+        {
+            ColorModule  defaultcolor;
+
+           var  colorfromthis = _ctx.ColorModule
+                                .Where(
+                                cm =>
+                                (cm.LMSUserId ?? userid) == userid
+                                && cm.ModuleId != null
+                                );
+
+
+   
+                defaultcolor =await  _ctx.ColorModule
+                                .Where(
+                                cm =>
+                                (cm.LMSUserId ?? userid) == userid
+                                && cm.ModuleId == null
+                                ).FirstOrDefaultAsync();
+
+
+
+         
+                var workthis = await _ctx.Modules
+                            .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId 
+                                && ((m.EndDate >= scheduleFormModel.StartTime || m.EndDate> scheduleFormModel.EndTime  ) 
+                                && (m.StartDate < scheduleFormModel.EndTime || m.StartDate <= scheduleFormModel.StartTime)))
+                            .GroupJoin(
+                            colorfromthis,
+                            m => m.Id,
+                            cm => cm.ModuleId,
+                            (x, y) => new { mod = x, color = y }
+                            )
+                            .SelectMany(
+                             x => x.color.DefaultIfEmpty(),
+                      (x, y) => new ScheduleViewModel
+                      {
+                          Id = x.mod.Id.ToString(),
+                          Color = y.Color,
+                          Name = x.mod.Name,
+                          Description = x.mod.Description,
+                          StartTime = x.mod.StartDate,
+                          EndTime = x.mod.EndDate,
+                          DayOfWeek = x.mod.StartDate.DayOfWeek
+                      }).ToListAsync();
+
+
+
+            var res = new List<ScheduleViewModel>[7];
+            for (int i = 0; i < 7; i++)
+            {
+                res[i] = new List<ScheduleViewModel>();
+            }
+
+        foreach (var work in workthis)
+                {
+                    if (work.Color != null || defaultcolor == null)
+                        res[(int)work.DayOfWeek].Add(work);
+                    else
+                    {
+                        ScheduleViewModel work2 = new ScheduleViewModel
+                        {
+                            Id = work.Id,
+                            Color = defaultcolor.Color,
+                            Name = work.Name,
+                            Description = work.Description,
+                            StartTime = work.StartTime,
+                            EndTime = work.EndTime,
+                            DayOfWeek = work.DayOfWeek
+
+                        };
+                        res[(int)work.DayOfWeek].Add(work2);
+                    }
+                }
+
+ 
+            return res;
+
+        }
+
         public async Task<bool> RemoveModuleHelperAsync(Guid moduleid)
         {
             var docModule = await _DocumentRepository.GetAllDocumentsForModuleAsync(moduleid);
@@ -393,10 +639,243 @@ namespace LMS_1_1.Repository
 
         }
 
+        public async Task<List<ScheduleViewModel>[]> GetActivitiesWithColour(ScheduleFormModel scheduleFormModel, string userid)
+        {
+            ColorActivity defaultcolor;
+
+            var colorfromthis = _ctx.ColorActivity
+                                 .Where(
+                                 cm =>
+                                 (cm.LMSUserId ?? userid) == userid
+                                 && cm.LMSActivityId != null
+                                 );
+
+            var colorfromtype = _ctx.ColorActivity
+                                 .Where(
+                                 cm =>
+                                 (cm.LMSUserId ?? userid) == userid
+                                 && cm.LMSActivityId == null
+                                 && cm.AktivityTypeID!= null
+                                 );
+
+            defaultcolor =await  _ctx.ColorActivity
+                            .Where(
+                            cm =>
+                            (cm.LMSUserId ?? userid) == userid
+                            && cm.LMSActivityId == null
+                            && cm.AktivityTypeID == null
+                            ).FirstOrDefaultAsync();
+
+
+            ICollection<LMSActivity> amongthese;
+            try
+            {
+                 amongthese = await _ctx.Modules
+            .Include(m => m.LMSActivities)
+            .ThenInclude(a => a.ActivityType)
+            .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId
+             && ((m.EndDate >= scheduleFormModel.StartTime || m.EndDate > scheduleFormModel.EndTime)
+                            && (m.StartDate < scheduleFormModel.EndTime || m.StartDate <= scheduleFormModel.StartTime)))
+
+            .Select(m => m.LMSActivities).FirstOrDefaultAsync()
+
+            ;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            try
+            {
+                amongthese = amongthese
+              .Where(a => ((a.EndDate >= scheduleFormModel.StartTime || a.EndDate > scheduleFormModel.EndTime)
+
+              && (a.StartDate < scheduleFormModel.EndTime || a.StartDate <= scheduleFormModel.StartTime))).ToList();
+                
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            List<ScheduleViewModel> workthis;
+
+            if (colorfromthis.Count() > 0)
+            {
+                try
+                {
+                    workthis = amongthese
+                            ?.GroupJoin(
+                    colorfromthis,
+                    m => m.Id,
+                    cm => cm.Id,
+                    (x, y) => new { mod = x, color = y }
+                    )
+                    .SelectMany(
+                     x => x.color.DefaultIfEmpty(),
+              (x, y) => new ScheduleViewModel
+              {
+                  Id = x.mod.Id.ToString(),
+                  Color = y.Color,
+                  Name = x.mod.Name,
+                  Description = x.mod.Description,
+                  StartTime = x.mod.StartDate,
+                  EndTime = x.mod.EndDate,
+                  DayOfWeek = x.mod.StartDate.DayOfWeek,
+                  ActivityTypeId = x.mod.ActivityTypeId
+              }).ToList();
+                }
+                catch (Exception ex)
+                {
+
+                    throw;
+                }
+
+
+
+                try
+                {
+                    /* update work with matches from colorfromtype */
+                    workthis = workthis
+                             ?.GroupJoin(
+                                colorfromtype,
+                                m => m.ActivityTypeId,
+                                cm => cm.AktivityTypeID,
+                                (x, y) => new { mod = x, color = y }
+                                )
+                                .SelectMany(
+                                 x => x.color.DefaultIfEmpty(),
+                          (x, y) => new ScheduleViewModel
+                          {
+                              Id = x.mod.Id.ToString(),
+                              Color = y.Color,
+                              Name = x.mod.Name,
+                              Description = x.mod.Description,
+                              StartTime = x.mod.StartTime,
+                              EndTime = x.mod.EndTime,
+                              DayOfWeek = x.mod.DayOfWeek,
+                              ActivityTypeId = x.mod.ActivityTypeId
+                          }).ToList();
+
+                }
+                catch (Exception ex)
+                {
+
+                    throw;
+                }
+            }
+            else
+            {
+                try
+                {
+                    /* update work with matches from colorfromtype */
+                    workthis = amongthese
+                             ?.GroupJoin(
+                                colorfromtype,
+                                m => m.ActivityTypeId,
+                                cm => cm.AktivityTypeID,
+                                (x, y) => new { mod = x, color = y }
+                                )
+                                .SelectMany(
+                                 x => x.color.DefaultIfEmpty(),
+                          (x, y) => new ScheduleViewModel
+                          {
+                              Id = x.mod.Id.ToString(),
+                              Color = y.Color,
+                              Name = x.mod.Name,
+                              Description = x.mod.Description,
+                              StartTime = x.mod.StartDate,
+                              EndTime = x.mod.EndDate,
+                              DayOfWeek = x.mod.StartDate.DayOfWeek,
+                              ActivityTypeId = x.mod.ActivityTypeId
+                          }).ToList();
+
+                }
+                catch (Exception ex)
+                {
+
+                    throw;
+                }
+            }
+            var res = new List<ScheduleViewModel>[7];
+            for (int i = 0; i < 7; i++)
+            {
+                res[i] = new List<ScheduleViewModel>();
+            }
+            try
+            {
+                foreach (var work in workthis)
+                {
+                    if (work.Color != null || defaultcolor== null)
+                        res[(int)work.DayOfWeek].Add(work);
+                    else
+                    {
+                        ScheduleViewModel work2 = new ScheduleViewModel
+                        {
+                            Id = work.Id,
+                            Color = defaultcolor.Color,
+                            Name = work.Name,
+                            Description = work.Description,
+                            StartTime = work.StartTime,
+                            EndTime = work.EndTime,
+                            DayOfWeek = work.DayOfWeek
+
+                        };
+                        res[(int)work.DayOfWeek].Add(work2);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+
+            return res;
+
+        }
+
+
         public async Task<bool> RemoveActivityHelperAsync(Guid activityid)
         {
             var docActivity = await _DocumentRepository.GetAllDocumentsForActivityAsync(activityid);
             return await _DocumentRepository.RemoveDocumentRangeAsync(docActivity.ToList());
+        }
+
+        public async Task<ICollection<ActivityViewModel>> GetActivitiesFromModulid(Guid moduleId)
+        {
+
+            var Activities = await _ctx.LMSActivity
+                           .Include(a => a.ActivityType)
+                          .Where(a => a.ModuleId == moduleId)
+                          .ToArrayAsync();
+
+
+
+
+            var res = new List<ActivityViewModel>();
+            foreach (var activity in Activities)
+            {
+
+
+                res.Add(
+                     new ActivityViewModel
+                     {
+                         Id = activity.Id,
+                         Name = activity.Name,
+                         StartDate = activity.StartDate,
+                         EndDate = activity.EndDate,
+                         Description = activity.Description,
+                         ActivityType = activity.ActivityType.Name
+                     }
+                    );
+            }
+            return res;
         }
 
         public struct YearAndDate
@@ -760,3 +1239,4 @@ namespace LMS_1_1.Repository
 
     }
 }
+ 

@@ -1,6 +1,7 @@
 ﻿using LMS_1_1.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace LMS_1_1.Data
 {
@@ -49,6 +50,78 @@ new ActivityType { Id = 1, Name = "Skip weekends" },
 new ActivityType { Id = 2, Name = "don't skip weekends" }
 
 );
+            modelBuilder.Entity<ColorModule>()
+            .HasData(
+                 new ColorModule
+                 {
+                      Id= Guid.NewGuid(),
+                     LMSUserId = null,
+                     ModuleId = null,
+                     Color = "#dbad95"
+                 }
+                );
+            modelBuilder.Entity<ColorActivity>()
+                .HasData(
+                    new ColorActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        LMSUserId = null,
+                        CourseId = null,
+                        LMSActivityId = null,
+                        AktivityTypeID = 1,
+                        Color = "#587aad"
+                    },
+                    new ColorActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        LMSUserId = null,
+                        CourseId = null,
+                        LMSActivityId = null,
+                        AktivityTypeID = 2,
+                        Color = "#68c930"
+                    },
+                    new ColorActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        LMSUserId = null,
+                        CourseId = null,
+                        LMSActivityId = null,
+                        AktivityTypeID = 3,
+                        Color = "#c95e30"
+                    },
+                    new ColorActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        LMSUserId = null,
+                        CourseId = null,
+                        LMSActivityId = null,
+                        AktivityTypeID = 4,
+                        Color = "#f45004"
+                    },
+                    new ColorActivity
+                    {
+                        Id = Guid.NewGuid(),
+                        LMSUserId = null,
+                        CourseId = null,
+                        LMSActivityId = null,
+                        AktivityTypeID = 5,
+                        Color = "#fcfaf9"
+                    }
+                );
+            modelBuilder.Entity<CourseSettings>()
+                .HasData(
+                    new CourseSettings
+                    {
+                        Id = Guid.NewGuid(),
+                        CourseId = null,
+                        Date = null,
+                        StartTime = "09:00:00",
+                        StartLunch = "12:00:00",
+                        EndLunch = "13:00:00",
+                        EndTime = "17:00:00"
+                    }
+                );
+
         }
 
 
@@ -67,6 +140,12 @@ new ActivityType { Id = 2, Name = "don't skip weekends" }
         public DbSet<CloneType> CloneTypes { get; set; }
 
         public DbSet<DocumentType> DocumentTypes { get; set; }
+
+        public DbSet<ColorModule> ColorModule { get; set; }
+
+        public DbSet<ColorActivity> ColorActivity { get; set; }
+
+        public DbSet<CourseSettings> CourseSettings { get; set; }
 
     }
 }

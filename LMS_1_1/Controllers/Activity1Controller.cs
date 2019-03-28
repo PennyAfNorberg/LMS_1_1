@@ -47,7 +47,7 @@ namespace LMS_1_1.Controllers
 
         // GET: api/Activity1/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<LMSActivity>> GetActivityById(string id)
         {
             Guid idG = Guid.Parse(id);
@@ -63,7 +63,7 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpGet("ActivityTypes")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<ICollection<ActivityType>>> GetActivityTypes()
         {
           return await  _context.ActivityTypes.ToListAsync();
@@ -73,7 +73,7 @@ namespace LMS_1_1.Controllers
         // POST: api/Activity1
         // POST: api/Module1
         [HttpPost("PostActivity")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         //public async Task<ActionResult<LMSActivity>> PostActivity([FromBody] dynamic activtyVm)
         public async Task<ActionResult<LMSActivity>> PostActivity([FromBody] ActivityFormModel activtyVm)
         {
@@ -98,7 +98,7 @@ namespace LMS_1_1.Controllers
 
         // PUT: api/Activity1/5
         [HttpPut("Edit/{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<LMSActivity>> Edit(string id, [FromBody] ActivityFormModel activtyVm)
         {
             //if (editModel.criD==null)
@@ -143,7 +143,7 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpPut("Move/{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<LMSActivity>> Move(string id, [FromBody]  ActivityFormModel activtyVm)
         {
             //if (editModel.criD==null)
@@ -190,7 +190,7 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<bool>> Delete(Guid iD)
         {
             var status = await _programrepository.RemoveActivityHelperAsync(iD);

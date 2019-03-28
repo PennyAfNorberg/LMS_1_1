@@ -381,7 +381,7 @@ namespace LMS_1_1.Controllers
             // and SavecouseListViewmodel.Userids is list of courseids
             try
             {
-                await _repository.RemoveAllCourseUsersForUser(savecouseListViewmodel.Courseid);
+                await _repository.RemoveAllCourseUsersForCourse(savecouseListViewmodel.Courseid);
 
                 foreach (var userid in savecouseListViewmodel.Userids)
                 {
