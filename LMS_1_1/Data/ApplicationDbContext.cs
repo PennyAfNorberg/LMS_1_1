@@ -108,6 +108,7 @@ new ActivityType { Id = 2, Name = "don't skip weekends" }
                         Color = "#fcfaf9"
                     }
                 );
+            
             modelBuilder.Entity<CourseSettings>()
                 .HasData(
                     new CourseSettings
@@ -115,13 +116,19 @@ new ActivityType { Id = 2, Name = "don't skip weekends" }
                         Id = Guid.NewGuid(),
                         CourseId = null,
                         Date = null,
-                        StartTime = "09:00:00",
-                        StartLunch = "12:00:00",
-                        EndLunch = "13:00:00",
+                        StartTime = "09:00:00", 
+                        EndTime = "12:00:00"
+                    },
+                    new CourseSettings
+                    {
+                        Id = Guid.NewGuid(),
+                        CourseId = null,
+                        Date = null,
+                        StartTime = "13:00:00",
                         EndTime = "17:00:00"
                     }
                 );
-
+       
         }
 
 

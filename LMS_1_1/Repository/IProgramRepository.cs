@@ -37,7 +37,7 @@ namespace LMS_1_1.Repository
         Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync ();
         Task<ActivityType> GetAllActivityTypesByIdAsync (int activityTypeId);
         Task<bool> ActivityTypeExistsAsync (int id);
-
+        
         Task AddTokenUser(string token, string userid);
         Task<bool> RemoveTokenUser(string token);
         Task<bool> IsTeacher(string token);
@@ -54,5 +54,6 @@ namespace LMS_1_1.Repository
         Task<Course> CloneCourseAsync(CloneFormModel cloneFormModel, string userid);
         Task<List<ScheduleViewModel>[]> GetModulesWithColour(ScheduleFormModel scheduleFormModel,string userid);
         Task<List<ScheduleViewModel>[]> GetActivitiesWithColour(ScheduleFormModel scheduleFormModel, string userid);
+        Task<List<CourseSettingsViewModel>> GetCourseSettingsAsync(string courseId, DateTime? startDate, DateTime? endDate);
     }
 }

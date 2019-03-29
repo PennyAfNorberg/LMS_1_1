@@ -162,7 +162,18 @@ namespace LMS_1_1.Controllers
 
             return Ok(Entities);
         }
+        [HttpPost("ActivitiesWithColor")]
+        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetActivitiesWithColour([FromBody] ScheduleFormModel scheduleFormModel)
+        {
+            string userid = (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
+            var Entities = await _programrepository.GetActivitiesWithColour(scheduleFormModel, userid);
+            if (Entities == null)
+            {
+                return NotFound();
+            }
 
+            return Ok(Entities);
+        }
 
         [HttpPost("Clone"), DisableRequestSizeLimit]
         [Authorize(Roles = ConstDefine.R_TEACHER)]
