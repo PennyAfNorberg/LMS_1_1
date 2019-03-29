@@ -37,14 +37,21 @@ namespace LMS_1_1.Repository
             _DocumentRepository = DocumentRepository;
             // _roleManager = roleManager;
             /*start for debug */
-            var data = new ScheduleFormModel
-            {
-                CourseId = "fd26f900-0d75-4ba9-fbdb-08d6b2b4aba9",
-                StartTime = DateTime.Parse("2019-03-25 00:00:01"),
-                EndTime = DateTime.Parse("2019-03-31 23:59:59")
-            };
-            string userid = "f5608d74-bc13-4325-b2bd-c0db27b69206";
-            GetActivitiesWithColour(data, userid).Wait();
+            /*      var data = new ScheduleFormModel
+                  {
+                      CourseId = "fd26f900-0d75-4ba9-fbdb-08d6b2b4aba9",
+                      StartTime = DateTime.Parse("2019-03-25 00:00:01"),
+                      EndTime = DateTime.Parse("2019-03-31 23:59:59")
+                  };
+                  string userid = "f5608d74-bc13-4325-b2bd-c0db27b69206";
+                  GetActivitiesWithColour(data, userid).Wait();
+
+            string courseId = "fd26f900-0d75-4ba9-fbdb-08d6b2b4aba9";
+            DateTime startDate = DateTime.Parse("2019-03-25 00:00:01");
+            DateTime  endDate = DateTime.Parse("2019-03-31 23:59:59");
+            GetCourseSettingsAsync(courseId, startDate, endDate).Wait();
+            */
+
         }
         #region Commen
         public async Task AddEntityAsync(object model)
@@ -297,8 +304,8 @@ namespace LMS_1_1.Repository
                 {
                     CourseId = cloneFormModel.NewCourseId,
                     StartTime = css.StartTime,
-                    StartLunch = css.StartLunch,
-                    EndLunch = css.EndLunch,
+                   // StartLunch = css.StartLunch,
+                   // EndLunch = css.EndLunch,
                     EndTime = css.EndTime
                 };
                 await _ctx.CourseSettings.AddRangeAsync(ncs);
@@ -347,8 +354,8 @@ namespace LMS_1_1.Repository
                 {
                     doc.NewModuleId = tmp2.Id;
                 }*/
-                //  foreach (var act in _ctx.LMSActivity.Where(m => m.ModuleId == mod.Id))
-                foreach (var act in coursedata.Modules.Where(m => m.Id == mod.Id).Select(m => m.LMSActivities).FirstOrDefault())
+            //  foreach (var act in _ctx.LMSActivity.Where(m => m.ModuleId == mod.Id))
+            foreach (var act in coursedata.Modules.Where(m => m.Id == mod.Id).Select(m => m.LMSActivities).FirstOrDefault())
                 {
                     tempstart = act.StartDate.AddDays(noOfDays);
                     tempend = act.EndDate.AddDays(noOfDays);
@@ -411,6 +418,34 @@ namespace LMS_1_1.Repository
 
 
             return new Course();
+        }
+
+        public async Task<List<CourseSettingsViewModel>> GetCourseSettingsAsync(string courseId, DateTime? startDate, DateTime? endDate)
+        {
+            List<CourseSettingsViewModel> svar = new List<CourseSettingsViewModel>();
+            List<DateTime> DateToCheck = new List<DateTime>();
+            for (DateTime i = startDate.Value; i < endDate.Value; i=i.AddDays(1))
+            {
+                DateToCheck.Add(i);
+            }
+            foreach (var DateCheck in DateToCheck)
+            {
+                svar.AddRange( _ctx.CourseSettings
+                    .Where(cs => (cs.CourseId.ToString() ?? courseId) == courseId && (cs.Date ?? DateCheck).ToString().Substring(0,10) == DateCheck.ToString().Substring(0, 10))
+                    .Select( cs => new CourseSettingsViewModel
+                    {
+                        Id=cs.Id,
+                        CourseId=cs.CourseId,
+                        Date=cs.Date,
+                        StartTime=cs.StartTime,
+                       // StartLunch=cs.StartLunch,
+                       // EndLunch=cs.EndLunch,
+                        EndTime=cs.EndTime,
+                        ForDate=DateCheck
+                    })
+                    );
+            }
+            return svar;
         }
 
         private DateTime skipWeekEnd(DateTime start)
@@ -530,12 +565,11 @@ namespace LMS_1_1.Repository
                                 ).FirstOrDefaultAsync();
 
 
-
          
                 var workthis = await _ctx.Modules
                             .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId 
-                                && ((m.EndDate >= scheduleFormModel.StartTime || m.EndDate> scheduleFormModel.EndTime  ) 
-                                && (m.StartDate < scheduleFormModel.EndTime || m.StartDate <= scheduleFormModel.StartTime)))
+                                && ((m.EndDate >= scheduleFormModel.StartTime   ) 
+                                && (m.StartDate <= scheduleFormModel.EndTime)))
                             .GroupJoin(
                             colorfromthis,
                             m => m.Id,
@@ -666,18 +700,25 @@ namespace LMS_1_1.Repository
                             && cm.AktivityTypeID == null
                             ).FirstOrDefaultAsync();
 
+            /* var testc = await _ctx.Modules
+                .Include(m => m.LMSActivities)
+                .ThenInclude(a => a.ActivityType)
+                .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId
+                  && ((m.EndDate >= scheduleFormModel.StartTime)
+                                && (m.StartDate <= scheduleFormModel.EndTime)))
 
+                .SelectMany(m => m.LMSActivities).ToListAsync();*/
             ICollection<LMSActivity> amongthese;
             try
             {
-                 amongthese = await _ctx.Modules
-            .Include(m => m.LMSActivities)
-            .ThenInclude(a => a.ActivityType)
-            .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId
-             && ((m.EndDate >= scheduleFormModel.StartTime || m.EndDate > scheduleFormModel.EndTime)
-                            && (m.StartDate < scheduleFormModel.EndTime || m.StartDate <= scheduleFormModel.StartTime)))
+                amongthese = await _ctx.Modules
+           .Include(m => m.LMSActivities)
+           .ThenInclude(a => a.ActivityType)
+           .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId
+             && (m.EndDate >= scheduleFormModel.StartTime)
+                           && (m.StartDate <= scheduleFormModel.EndTime))
 
-            .Select(m => m.LMSActivities).FirstOrDefaultAsync()
+           .SelectMany(m => m.LMSActivities).ToListAsync();
 
             ;
             }
@@ -690,9 +731,9 @@ namespace LMS_1_1.Repository
             try
             {
                 amongthese = amongthese
-              .Where(a => ((a.EndDate >= scheduleFormModel.StartTime || a.EndDate > scheduleFormModel.EndTime)
+              .Where(a => (a.EndDate >= scheduleFormModel.StartTime )
 
-              && (a.StartDate < scheduleFormModel.EndTime || a.StartDate <= scheduleFormModel.StartTime))).ToList();
+              && (a.StartDate <= scheduleFormModel.EndTime )).ToList();
                 
 
             }
@@ -740,7 +781,7 @@ namespace LMS_1_1.Repository
                 try
                 {
                     /* update work with matches from colorfromtype */
-                    workthis = workthis
+        workthis = workthis
                              ?.GroupJoin(
                                 colorfromtype,
                                 m => m.ActivityTypeId,

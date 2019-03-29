@@ -83,6 +83,7 @@ export class CloneComponent implements OnInit, OnDestroy {
     if (mimeType.match(/image\/*/) == null) {
         return;
     }
+    this.errorMessage="";
     var reader = new FileReader();
     this.imagePath = files;
     reader.readAsDataURL(files[0]);
@@ -103,8 +104,10 @@ register() {
  
     let fileToUpload = this.fileInputVariable.nativeElement.files[0];
     let formData = new FormData();
-   /* let MIMEtype = fileToUpload.type.split("/")[0];
-    console.log(MIMEtype);*/
+    let MIMEtype = fileToUpload.type.split("/")[0];
+   // console.log(MIMEtype);
+   if(MIMEtype=="image")
+   {
     formData.append("ID",this.cloneCourse.id.toString());
     formData.append('Name', this.courseForm.value.name);
     formData.append('newDate', this.courseForm.value.startDate);
@@ -124,6 +127,11 @@ register() {
         },
         error => this.errorMessage = <any>error
     );
+      }
+      else
+      {
+        this.errorMessage="Image file is needed if you upload an image";
+      }
 }
 
   ngOnDestroy(): void {

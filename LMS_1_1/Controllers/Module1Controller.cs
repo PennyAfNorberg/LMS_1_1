@@ -210,7 +210,7 @@ namespace LMS_1_1.Controllers
 
 
         [HttpPost("TestIfInRange")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<bool>> TestIfInRange([FromBody] DubbParas parmas)
         {
             bool res = false;

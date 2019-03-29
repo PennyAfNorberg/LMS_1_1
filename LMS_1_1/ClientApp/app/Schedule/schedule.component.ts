@@ -3,8 +3,11 @@ import { Subject, VirtualTimeScheduler } from 'rxjs';
 import { Router } from '@angular/router';
 import { CourseService } from '../Courses/course.service';
 import { takeUntil } from 'rxjs/operators';
-import { Scheduleentites, weekdays } from './Scheduleentites';
+import { Scheduleentites, weekdays, ScheduleFormModel, CourseSettingsViewModel } from './Scheduleentites';
 import { Activity,Module } from '../Courses/course';
+import { ScheduleService } from './schedule.service';
+import { isDefaultChangeDetectionStrategy } from '@angular/core/src/change_detection/constants';
+import { LoginMessageHandlerService } from '../Login/login-message-handler.service';
 
 @Component({
   selector: 'app-schedule',
@@ -15,7 +18,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   private unsubscribe : Subject<void> = new Subject();
    private courseid:string;
+   private scheduleFormModel: ScheduleFormModel= new ScheduleFormModel();
   private _week;
+  errorMessage: string;
+  actsub: any= null;
+  courseSettings: CourseSettingsViewModel[];
   get week()
   {
     return this._week;
@@ -23,29 +30,29 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   set week(value)
   {
     let temp=this.GetStartAndFromWeek(value);
-    this.startdate=temp[0];
-    this.enddate=temp[1];
+    this.scheduleFormModel.startTime=temp[0];
+    this.scheduleFormModel.endTime=temp[1];
     this._week=value;
+    this.requery();
     
   }
-   private _startdate:Date;
    get startdate()
    {
-     return this._startdate;
+     return this.scheduleFormModel.startTime;
    }
    set startdate(value)
    {
-    this._startdate=value;
+    this.scheduleFormModel.startTime=value;
     this.requery();
    }
-   private _enddate:Date;
-   get enddtdate()
+
+   get enddate()
    {
-    return this._enddate;
+    return this.scheduleFormModel.endTime;
   }
   set enddate(value)
   {
-   this._enddate=value;
+   this.scheduleFormModel.endTime=value;
    this.requery();
   }
   private _type:string;
@@ -58,35 +65,47 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this._type= value;
     this.requery();
   }
-  private Weekdays: weekdays[]; //=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  private weekdays: weekdays[]; //=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   private entities:Scheduleentites[][];
  
   constructor(private cd: ChangeDetectorRef , private router: Router
-    , private CourseService: CourseService) {
+    , private CourseService: CourseService
+    ,private ScheduleService :ScheduleService
+    ,private messhandler: LoginMessageHandlerService 
+    ) {
      }
 
   ngOnInit() {
      this.week=this.getWeekNumber(new Date());
-     this.Weekdays=
+     this.messhandler.Courseid
+     .pipe(takeUntil(this.unsubscribe))
+     .subscribe(
+      (id: string)  =>
+      {
+         this.scheduleFormModel.courseId=id;
+         this.cd.markForCheck();
+      }); 
+    
+     this.weekdays=
     [
       {
-       id:0,
+       id:1,
       name:"Monday"
      },
      {
-      id:1,
+      id:2,
      name:"Tuesday"
     },
     {
-      id:2,
+      id:3,
      name:"Wednesday"
     },
     {
-      id:3,
+      id:4,
      name:"Thursday"
     },
     {
-      id:4,
+      id:5,
      name:"Friday"
     },
     ];
@@ -95,30 +114,89 @@ export class ScheduleComponent implements OnInit, OnDestroy {
      // courseid
      // hämta data
      // format
-
-     this.CourseService.getCourseById("1")
-     .pipe(takeUntil(this.unsubscribe))
-     .subscribe(
-       status =>
-       {
-        this.cd.markForCheck();
-       });
+     this.requery();
+  
   }
 
   private requery(): any {
    // if all pars send q
+    if(this.actsub!=null)
+      this.actsub.unsubscribe();
+    if(this.type=="Activities")
+    {
+      this.actsub=this.ScheduleService.GetActivitiesWithColour(this.scheduleFormModel)
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+         (entities: Scheduleentites[][])  =>
+         {
+         // this.entities=entities;
+            this.GetCourseSettings(entities);
+            this.cd.markForCheck();
+         },
+         error => this.errorMessage = <any>error
+      );
+    }
+    if(this.type=="Modules")
+    {
+      this.actsub=this.ScheduleService.GetModulesWithColour(this.scheduleFormModel)
+      .pipe(takeUntil(this.unsubscribe))
+      .subscribe(
+         (entities: Scheduleentites[][])  =>
+         {
+         // this.entities=entities;
+            this.GetCourseSettings(entities);
+            this.cd.markForCheck();
+         },
+         error => this.errorMessage = <any>error
+      );
+    }
 
   }
 
-   private mapActivites(Activities : Activity[])
+   private GetCourseSettings(entities: Scheduleentites[][])
    {
-     // needs act + color + scale
+    this.ScheduleService.GetCourseSettings(this.scheduleFormModel.courseId, this.scheduleFormModel.startTime, this.scheduleFormModel.endTime)
+    .pipe(takeUntil(this.unsubscribe))
+    .subscribe(
+        (cs:CourseSettingsViewModel[]) =>
+        {
+          this.courseSettings=cs;
+          this.mapEntities(entities);
+          this.cd.markForCheck();
+        }
 
+    );
    }
-   private mapModules(Modules : Module[])
-   {
 
-   }  
+  mapEntities(entities: Scheduleentites[][]) {
+    //Size...
+    let size1=entities.length;
+    for(let i=0; i<size1 ; i++)
+    {
+        let size2= entities[i].length;
+        for( let j=0; j<size2; j++)
+        {
+            if(entities[i][j].length==null)
+            {
+               
+              let endt:Date= new  Date(entities[i][j].endTime);
+              let startt:Date=new Date(entities[i][j].startTime);
+              let diff=this.datediff(endt,startt);
+              if(diff<9) // eg daylength
+                entities[i][j].length=diff;
+           /*   else
+              {
+                while(diff>8)
+
+              }*/
+
+            }
+        }
+    }
+    this.entities=entities;
+  }
+
+ 
 
   private getWeekNumber(d:any):any {
     // Copy date so don't modify original
@@ -143,7 +221,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     let endd=new Date(endstr);
     let rest:number=this.mapFirstToStart(startd);
     startd=this.adddays(startd,7*weeknr+rest);
-    endd=this.adddays(endd,7*weeknr+7+rest);
+    endd=this.adddays(endd,7*weeknr+6+rest);
     //let startd:Date=new Date(Date.UTC(d.getUTCFullYear(),0,1))
 
     return [startd,endd];
@@ -154,6 +232,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
      return d;
    }
 
+    private datediff(a:Date,b:Date):number
+    {
+      return (a.valueOf()-b.valueOf()) /(1000*60*60)
+    }
 private mapFirstToStart(d:Date):number
 {
   switch( d.getDay())

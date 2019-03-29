@@ -4,14 +4,16 @@ using LMS_1_1.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LMS_1_1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190329094025_changecoursettings")]
+    partial class changecoursettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,31 +115,31 @@ namespace LMS_1_1.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a621799a-47b2-45e8-8d1f-2f256fb68a0a"),
+                            Id = new Guid("b99ad5c1-07c4-4533-a2be-9fb94079acda"),
                             AktivityTypeID = 1,
                             Color = "#587aad"
                         },
                         new
                         {
-                            Id = new Guid("02422a7d-99ec-40e2-bd1b-8bf4473a9cf2"),
+                            Id = new Guid("bd50bf65-c056-4488-b78f-7f9eafd83f21"),
                             AktivityTypeID = 2,
                             Color = "#68c930"
                         },
                         new
                         {
-                            Id = new Guid("2c7b43b8-06aa-412d-8c09-5eb00b1425e4"),
+                            Id = new Guid("e7c9bc2e-6301-4262-a731-c229462b2029"),
                             AktivityTypeID = 3,
                             Color = "#c95e30"
                         },
                         new
                         {
-                            Id = new Guid("b9b95bd2-7820-45d9-9354-8dd9437fd9bd"),
+                            Id = new Guid("37f83384-4411-4a46-ac8a-c610821862f7"),
                             AktivityTypeID = 4,
                             Color = "#f45004"
                         },
                         new
                         {
-                            Id = new Guid("450dbee0-90bd-4245-a45d-087881ceaa4d"),
+                            Id = new Guid("1b2ad0dd-c7de-443d-9e75-5bb821299710"),
                             AktivityTypeID = 5,
                             Color = "#fcfaf9"
                         });
@@ -166,7 +168,7 @@ namespace LMS_1_1.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d9a5a7b1-5e72-43bc-839c-26a65c2869d7"),
+                            Id = new Guid("1eb6e978-2fb3-4e70-812c-cba0d0114df3"),
                             Color = "#dbad95"
                         });
                 });
@@ -209,20 +211,6 @@ namespace LMS_1_1.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("CourseSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("dee8ad3e-18fe-414d-8a1d-9461a5e00b84"),
-                            EndTime = "12:00:00",
-                            StartTime = "09:00:00"
-                        },
-                        new
-                        {
-                            Id = new Guid("0ae1450b-86f5-45f6-8f2c-bfc0a2f3292a"),
-                            EndTime = "17:00:00",
-                            StartTime = "13:00:00"
-                        });
                 });
 
             modelBuilder.Entity("LMS_1_1.Models.CourseUser", b =>

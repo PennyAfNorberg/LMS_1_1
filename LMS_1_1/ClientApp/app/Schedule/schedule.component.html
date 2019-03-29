@@ -1,27 +1,31 @@
 <div class="row">
  
-  <div class="col-6">
+  <div class="col-6 nopad">
     <input type="week" name="week" [(ngModel)]="week">
   </div>
-  <div class="col-6">
+  <div class="col-6 nopad" >
       <select name="type" [(ngModel)]="type"  >
           <option value="Modules">By modules</option>
           <option value="Activities">By activities</option>
       </select>
     </div>
+  </div>
+    <div *ngIf="entities" class="row">
     <div class="offset-1"></div>
-  <div class="col-2 border border-dark" *ngFor="let weekday of weekdays"> 
-    <span>{{weekday.name}}</span>
+  <div class="col-2 border border-dark nopad" *ngFor="let weekday of weekdays"> 
+    <span style="font-size:1vw;">{{weekday.name}}</span>
     <div *ngFor="let entity of entities[weekday.id]"
         [style.background-color]="entity.color"
-        [style.height.ex]="entity.length"
-        style="position: relative;"
-        [style.top.ex]="entity.OffsetTime"
+        [style.height.em]="entity.length"
+        style="position: relative; font-size:1vw;"
+        [style.top]="entity.OffsetTime"
         [title]="entity.description"
       >
  {{entity.name}}
     </div>
+    
   </div>
-
   <div class="col-1"></div>
-  </div>
+</div>
+
+
