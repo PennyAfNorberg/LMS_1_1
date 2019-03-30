@@ -34,7 +34,7 @@ namespace LMS_1_1.Controllers
             _userManager = userManager;
         }
         // GET: api/ColorActivity
-        [HttpGet]
+        [HttpGet("no")]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };

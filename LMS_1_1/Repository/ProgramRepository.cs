@@ -422,6 +422,7 @@ namespace LMS_1_1.Repository
 
         public async Task<List<CourseSettingsViewModel>> GetCourseSettingsAsync(string courseId, DateTime? startDate, DateTime? endDate)
         {
+            IFormatProvider culture = new CultureInfo("sv-SE", true);
             List<CourseSettingsViewModel> svar = new List<CourseSettingsViewModel>();
             List<DateTime> DateToCheck = new List<DateTime>();
             for (DateTime i = startDate.Value; i < endDate.Value; i=i.AddDays(1))
@@ -437,10 +438,10 @@ namespace LMS_1_1.Repository
                         Id=cs.Id,
                         CourseId=cs.CourseId,
                         Date=cs.Date,
-                        StartTime=cs.StartTime,
+                        StartTime= DateCheck.ToString("yyyy-MM-dd") +" "+ cs.StartTime, 
                        // StartLunch=cs.StartLunch,
                        // EndLunch=cs.EndLunch,
-                        EndTime=cs.EndTime,
+                        EndTime= DateCheck.ToString("yyyy-MM-dd") + " "  + cs.EndTime,
                         ForDate=DateCheck
                     })
                     );

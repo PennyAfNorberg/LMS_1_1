@@ -32,14 +32,14 @@ namespace LMS_1_1.Controllers
             _userManager = userManager;
         }
         // GET: api/ColorModule
-        [HttpGet]
+        [HttpGet("why")]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
         // GET: api/ColorModule/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public string Get(int id)
         {
             return "value";

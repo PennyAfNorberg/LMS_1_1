@@ -8,6 +8,7 @@ import { Activity,Module } from '../Courses/course';
 import { ScheduleService } from './schedule.service';
 import { isDefaultChangeDetectionStrategy } from '@angular/core/src/change_detection/constants';
 import { LoginMessageHandlerService } from '../Login/login-message-handler.service';
+import { CssSelector } from '@angular/compiler';
 
 @Component({
   selector: 'app-schedule',
@@ -22,6 +23,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private _week;
   errorMessage: string;
   actsub: any= null;
+  position:string="relative";
   courseSettings: CourseSettingsViewModel[];
   get week()
   {
@@ -171,6 +173,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   mapEntities(entities: Scheduleentites[][]) {
     //Size...
     let size1=entities.length;
+    let sizek= this.courseSettings.length;
+    let k=0;
+    let startTime=new  Date(this.courseSettings[k].startTime);
+    let endTime=new  Date(this.courseSettings[k].endTime);
     for(let i=0; i<size1 ; i++)
     {
         let size2= entities[i].length;
@@ -178,26 +184,88 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         {
             if(entities[i][j].length==null)
             {
-               
+
+              
+                
               let endt:Date= new  Date(entities[i][j].endTime);
               let startt:Date=new Date(entities[i][j].startTime);
-              let diff=this.datediff(endt,startt);
-              if(diff<9) // eg daylength
-                entities[i][j].length=diff;
-           /*   else
+          
+              let ent=entities[i][j];
+              let laststart=new Date(ent.startTime);
+              //.find( cs => cs.forDate.getDate()==startt.getDate());
+              while((startTime < startt)  && (k< sizek) )
               {
-                while(diff>8)
+                k++;
+                 startTime=new  Date(this.courseSettings[k].startTime);
+                 endTime=new  Date(this.courseSettings[k].endTime);
+              }
 
-              }*/
+              entities[i][j].offsettime=this.datediff(startt,startTime);
+              let diff=this.datediff(endt,startt);
+               if(startt=>startTime)
+                console.log("=>");
+               if(endt<= endTime) 
+                console.log("<=");
+             // if(endt.getDate() == startt.getDate()) // eg daylength
+             if((startt=>startTime) && (endt<= endTime) )
+             {
+                entities[i][j].length=diff;
+             }
+             else
+              {
+                entities[i][j].length=this.datediff(endTime,startTime);
+                k++;
+                    startTime=new  Date(this.courseSettings[k].startTime);
+                    endTime=new  Date(this.courseSettings[k].endTime);
+                    laststart=startTime;
+                    j++;
+                while((endTime<= endt) && (i< size1) )
+                {
+                   
+                   // if(laststart.getDate() !=startTime.getDate() )
+                   if(!this.compDay(laststart,startTime)) 
+                   {
+                      i++;
+                      j=0;
+                      //laststart=startTime;
+                    }
+                    if(i< size1)
+                    {
+                      entities[i].splice(j,0,{
+                          weekday:"",
+                          id:"",
+                          color:ent.color,
+                          length:(endTime>endt)?this.datediff(endt,startTime):this.datediff(endTime,startTime),
+                          offsettime:this.datediff(startTime,laststart),
+                          name:ent.name,
+                          description:ent.description,
+                          startTime:ent.startTime,
+                          endTime:ent.endTime
+                          });
+                    }
+                    j++; 
+                    k++;
+                    startTime=new  Date(this.courseSettings[k].startTime);
+                    endTime=new  Date(this.courseSettings[k].endTime);
+                    laststart=startTime;   
+                }
+              }
 
             }
         }
     }
     this.entities=entities;
   }
+  minstart(arg0: CourseSettingsViewModel[]): any {
+    throw new Error("Method not implemented.");
+  }
 
  
+private compDay(a:Date, b:Date): boolean
+{
+ return a.toISOString().substr(0,10) == b.toISOString().substring(0,10);
 
+}
   private getWeekNumber(d:any):any {
     // Copy date so don't modify original
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));

@@ -4,7 +4,7 @@ export class Scheduleentites
     id:string;
     color: string;
     length:number;
-    Offsettime: number;
+    offsettime: number;
     name:string;
     description:string;
     startTime:string;
