@@ -28,11 +28,13 @@ export class DocumentService {
     private documentUrl = "https://localhost:44396/api/documents1/";
 
     private getAuthHeader(): HttpHeaders {
+        this.AuthService.isAuthenticated;
         return new HttpHeaders({ "Authorization": "Bearer " + this.token });
     }
 
 
     private getAuthHeader2() {
+        this.AuthService.isAuthenticated;
         return {
             headers: new HttpHeaders({
                 'Accept': 'text/html, application/xhtml+xml, */*',

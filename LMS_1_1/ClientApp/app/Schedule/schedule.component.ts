@@ -78,7 +78,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
      }
 
   ngOnInit() {
-     this.week=this.getWeekNumber(new Date());
+    // this.week=this.getWeekNumber(new Date());
+     this.messhandler.Week
+     .pipe(takeUntil(this.unsubscribe))
+     .subscribe(
+      (id: Date)  =>
+      {
+        this.week=this.getWeekNumber(id);
+         this.cd.markForCheck();
+      }); 
+    
      this.messhandler.Courseid
      .pipe(takeUntil(this.unsubscribe))
      .subscribe(
@@ -92,23 +101,28 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     [
       {
        id:1,
-      name:"Monday"
+      name:"Monday",
+      acronym:"Mon",
      },
      {
       id:2,
-     name:"Tuesday"
+     name:"Tuesday",
+     acronym:"Tu",
     },
     {
       id:3,
-     name:"Wednesday"
+     name:"Wednesday",
+     acronym:"Wed",
     },
     {
       id:4,
-     name:"Thursday"
+     name:"Thursday",
+     acronym:"Tu",
     },
     {
       id:5,
-     name:"Friday"
+     name:"Friday",
+     acronym:"Fri",
     },
     ];
      this.type="Activities";
@@ -177,10 +191,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     let k=0;
     let startTime=new  Date(this.courseSettings[k].startTime);
     let endTime=new  Date(this.courseSettings[k].endTime);
+    let startTime2:Date=startTime;
+    let laststart=startTime;
+    let lastend:Date=startTime;
     for(let i=0; i<size1 ; i++)
     {
         let size2= entities[i].length;
-        for( let j=0; j<size2; j++)
+        let j=0
+        while(j<size2)
+      //  for( let j=0; j<size2; j++)
         {
             if(entities[i][j].length==null)
             {
@@ -189,45 +208,52 @@ export class ScheduleComponent implements OnInit, OnDestroy {
                 
               let endt:Date= new  Date(entities[i][j].endTime);
               let startt:Date=new Date(entities[i][j].startTime);
-          
+              
               let ent=entities[i][j];
-              let laststart=new Date(ent.startTime);
-              //.find( cs => cs.forDate.getDate()==startt.getDate());
-              while((startTime < startt)  && (k< sizek) )
+            
+              while((endTime < startt)  && (k< sizek) )
               {
                 k++;
-                 startTime=new  Date(this.courseSettings[k].startTime);
-                 endTime=new  Date(this.courseSettings[k].endTime);
+                startTime2=new  Date(this.courseSettings[k].startTime);
+                if(this.compDay(laststart,startTime2))
+                {
+                  lastend=endTime;
+                }
+                else
+                { // new Day
+                  lastend=startTime2;
+                }
+                
+                startTime=startTime2;
+                endTime=new  Date(this.courseSettings[k].endTime);
               }
-
-              entities[i][j].offsettime=this.datediff(startt,startTime);
-              let diff=this.datediff(endt,startt);
-               if(startt=>startTime)
-                console.log("=>");
-               if(endt<= endTime) 
-                console.log("<=");
-             // if(endt.getDate() == startt.getDate()) // eg daylength
+              laststart=startTime;
+              entities[i][j].offsettime=this.datediff(startTime,lastend);
              if((startt=>startTime) && (endt<= endTime) )
              {
-                entities[i][j].length=diff;
+                entities[i][j].length=this.datediff(endt,startt);
+                j++;
              }
              else
               {
                 entities[i][j].length=this.datediff(endTime,startTime);
                 k++;
+                    lastend=endTime;
+                    laststart=startTime;
                     startTime=new  Date(this.courseSettings[k].startTime);
                     endTime=new  Date(this.courseSettings[k].endTime);
-                    laststart=startTime;
+                    
                     j++;
-                while((endTime<= endt) && (i< size1) )
+                while((endTime<= endt) && (i< size1) && (k<sizek))
                 {
                    
-                   // if(laststart.getDate() !=startTime.getDate() )
                    if(!this.compDay(laststart,startTime)) 
                    {
                       i++;
                       j=0;
-                      //laststart=startTime;
+                      lastend=startTime;
+                      laststart=startTime;
+                      size2= entities[i].length;
                     }
                     if(i< size1)
                     {
@@ -236,18 +262,35 @@ export class ScheduleComponent implements OnInit, OnDestroy {
                           id:"",
                           color:ent.color,
                           length:(endTime>endt)?this.datediff(endt,startTime):this.datediff(endTime,startTime),
-                          offsettime:this.datediff(startTime,laststart),
+                          offsettime:this.datediff(startTime,lastend),
                           name:ent.name,
                           description:ent.description,
                           startTime:ent.startTime,
                           endTime:ent.endTime
                           });
+                          size2++;
                     }
                     j++; 
                     k++;
-                    startTime=new  Date(this.courseSettings[k].startTime);
-                    endTime=new  Date(this.courseSettings[k].endTime);
-                    laststart=startTime;   
+                    if(k==sizek)
+                        break;
+                    else
+                    {  
+                     
+                      startTime2=new  Date(this.courseSettings[k].startTime);
+                      if(this.compDay(laststart,startTime2))
+                      {
+                        lastend=endTime;
+                      }
+                      else
+                      { // new Day
+                        lastend=startTime2;
+                      }
+                      laststart=startTime;
+                      startTime=startTime2;
+                      endTime=new  Date(this.courseSettings[k].endTime);
+                      
+                    }  
                 }
               }
 

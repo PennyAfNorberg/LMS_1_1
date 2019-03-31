@@ -30,7 +30,7 @@ export class ModulDetailsComponent implements OnInit, OnDestroy  {
       .subscribe( i => this.isTeacher=i);
       */
       let Modulid: string = this.route.snapshot.paramMap.get('id');
-     
+      this.messhandler.SendWeek(new Date());
       this.CourseService.getModulAndActivitybyId(Modulid)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(

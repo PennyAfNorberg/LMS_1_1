@@ -34,7 +34,6 @@
                  
                     <div class="row">
                         <div class="col-6">
-                        
                             <a class="btn btn-info" [routerLink]="['/courses/', module.courseId]" title="Go back" ><i class="fa fa-2x fa-arrow-circle-left"></i></a>
                         
                         </div>
@@ -49,6 +48,7 @@
        
 
         <div class="col-md-4">
+                <app-schedule></app-schedule>
             <div>
                 <upload-detail [DocOwnerId]="module.id"></upload-detail>
             </div>

@@ -68,6 +68,7 @@ public gotDate():void
       this.messhandler.SendDubbType("Module");
       this.messhandler.SendDubbStart(new Date(this.Module.startDate+":00.000Z"));
       this.messhandler.SendDubbEnd(new Date(this.Module.endDate+":00.000Z"));
+      this.messhandler.SendWeek(new Date(this.Module.startDate+":00.000Z"));
    }
 
   // post data

@@ -32,6 +32,9 @@ export class ScheduleService  implements  OnDestroy {
 
   private getAuthHeader() : HttpHeaders
   {
+    if (this.AuthService.isAuthenticated)
+    return  new HttpHeaders({ "Authorization": "Bearer " + this.token });
+
     return  new HttpHeaders({ "Authorization": "Bearer " + this.token });
   }
 

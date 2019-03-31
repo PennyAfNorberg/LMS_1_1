@@ -14,6 +14,7 @@ export class weekdays
 {
     id:number;
     name:string;
+    acronym: string;
 }
 
 export class ScheduleFormModel

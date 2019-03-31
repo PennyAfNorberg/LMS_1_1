@@ -8,6 +8,7 @@ import { IsTeacherGuard } from '../Shared/is-teacher.guard';
 import { ModulesModule } from 'ClientApp/app/Modules/modules.module';
 import { EditComponent } from '../Activities/edit/edit.component';
 import { ActivityDeleteComponent } from './activity-delete/activity-delete.component';
+import { ScheduleModule } from '../Schedule/schedule.module';
 
 @NgModule({
     declarations: [
@@ -22,6 +23,7 @@ import { ActivityDeleteComponent } from './activity-delete/activity-delete.compo
         FormsModule,
         DocumentsModule,
         ModulesModule,
+        ScheduleModule,
         RouterModule.forChild(
             [
                 {

@@ -17,6 +17,7 @@ export class ModuleService implements OnDestroy {
     private unsubscribe: Subject<void> = new Subject();
 
     private getAuthHeader(): HttpHeaders {
+        this.AuthService.isAuthenticated;
         return new HttpHeaders({ "Authorization": "Bearer " + this.token });
     }
 

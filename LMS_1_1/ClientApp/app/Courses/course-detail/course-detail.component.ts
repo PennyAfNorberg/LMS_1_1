@@ -41,6 +41,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy  {
           });*/
         let id: string = this.route.snapshot.paramMap.get('id');
         this.messhandler.SendCourseid(id);
+        this.messhandler.SendWeek(new Date());
         
         this.CourseService.getCourseAndModulebyId(id)
         .pipe(takeUntil(this.unsubscribe))

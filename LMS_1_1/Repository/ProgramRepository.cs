@@ -427,7 +427,8 @@ namespace LMS_1_1.Repository
             List<DateTime> DateToCheck = new List<DateTime>();
             for (DateTime i = startDate.Value; i < endDate.Value; i=i.AddDays(1))
             {
-                DateToCheck.Add(i);
+                if(i.DayOfWeek != DayOfWeek.Saturday && i.DayOfWeek != DayOfWeek.Sunday)
+                    DateToCheck.Add(i);
             }
             foreach (var DateCheck in DateToCheck)
             {
@@ -566,8 +567,11 @@ namespace LMS_1_1.Repository
                                 ).FirstOrDefaultAsync();
 
 
-         
-                var workthis = await _ctx.Modules
+            var coursesettings = await GetCourseSettingsAsync(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
+            var minCsstart = coursesettings.Min(cs => cs.StartTime);
+            var maxCsend = coursesettings.Max(cs => cs.EndTime);
+
+            var workthis = await _ctx.Modules
                             .Where(m => m.CourseId.ToString() == scheduleFormModel.CourseId 
                                 && ((m.EndDate >= scheduleFormModel.StartTime   ) 
                                 && (m.StartDate <= scheduleFormModel.EndTime)))
@@ -589,6 +593,22 @@ namespace LMS_1_1.Repository
                           EndTime = x.mod.EndDate,
                           DayOfWeek = x.mod.StartDate.DayOfWeek
                       }).ToListAsync();
+
+
+
+            workthis =  workthis
+                .Select
+                (
+                 m => new ScheduleViewModel
+                 {
+                     Id = m.Id,
+                     Name = m.Name,
+                     StartTime = (DateTime.Parse(minCsstart) > m.StartTime) ? DateTime.Parse(minCsstart) : m.StartTime,
+                     EndTime = (DateTime.Parse(maxCsend) < m.EndTime) ? DateTime.Parse(maxCsend) : m.EndTime,
+                     Description = m.Description,
+                     DayOfWeek = DateTime.Parse(minCsstart).DayOfWeek
+                 }).ToList();
+
 
 
 
@@ -709,6 +729,11 @@ namespace LMS_1_1.Repository
                                 && (m.StartDate <= scheduleFormModel.EndTime)))
 
                 .SelectMany(m => m.LMSActivities).ToListAsync();*/
+            var coursesettings = await GetCourseSettingsAsync(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
+
+            var minCsstart = coursesettings.Min(cs => cs.StartTime);
+            var maxCsend = coursesettings.Max(cs => cs.EndTime);
+
             ICollection<LMSActivity> amongthese;
             try
             {
@@ -734,8 +759,29 @@ namespace LMS_1_1.Repository
                 amongthese = amongthese
               .Where(a => (a.EndDate >= scheduleFormModel.StartTime )
 
-              && (a.StartDate <= scheduleFormModel.EndTime )).ToList();
-                
+              && (a.StartDate <= scheduleFormModel.EndTime ))
+              
+              
+              .ToList();
+
+                amongthese = amongthese//.Where(m => m.StartDate < scheduleFormModel.StartTime)
+                    .Select
+                    (
+                     m => new LMSActivity
+                     {
+                         Id = m.Id,
+                         Name = m.Name,
+                         StartDate = (DateTime.Parse(minCsstart)> m.StartDate)? DateTime.Parse(minCsstart): m.StartDate,
+                         EndDate = (DateTime.Parse(maxCsend) < m.EndDate)? DateTime.Parse(maxCsend):m.EndDate,
+                         Description = m.Description,
+                         ModuleId = m.ModuleId,
+                         ActivityTypeId = m.ActivityTypeId
+
+                     }
+
+
+                    ).ToList();
+
 
             }
             catch (Exception ex)
@@ -743,6 +789,8 @@ namespace LMS_1_1.Repository
 
                 throw;
             }
+
+            
 
             List<ScheduleViewModel> workthis;
 

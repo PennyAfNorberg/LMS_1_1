@@ -25,6 +25,7 @@ export class ActivitiesService implements OnDestroy {
 
 
     private getAuthHeader(): HttpHeaders {
+        this.AuthService.isAuthenticated;
         return new HttpHeaders({ "Authorization": "Bearer " + this.token });
     }
 

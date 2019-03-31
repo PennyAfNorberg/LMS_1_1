@@ -79,10 +79,19 @@ export class LoginMessageHandlerService {
  private CourseNameSource = new BehaviorSubject<string>(null);
  CourseName = this.CourseNameSource.asObservable();
 
+ private WeekSource = new BehaviorSubject<Date>(null);
+ Week = this.WeekSource.asObservable();
+
 
 
 
   constructor() { }
+
+  public SendWeek(week:Date) : boolean 
+  {      
+    this.WeekSource.next( week);
+    return true;
+  }
 
   public SendUserId(userid:string) : boolean 
   {      
