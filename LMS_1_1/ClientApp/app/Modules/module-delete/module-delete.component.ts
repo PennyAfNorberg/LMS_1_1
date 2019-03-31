@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { ModuleService } from '../module.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CourseService } from 'ClientApp/app/Courses/course.service';
@@ -14,13 +14,13 @@ import { LoginMessageHandlerService } from 'ClientApp/app/Login/login-message-ha
     templateUrl: './module-delete.component.html',
     styleUrls: ['./module-delete.component.css']
 })
-export class ModuleDeleteComponent implements OnInit {
+export class ModuleDeleteComponent implements OnInit, OnDestroy {
 
     module_delete: IModule;
     private unsubscribe: Subject<void> = new Subject();
     courseid: string ="";
     constructor(private route: ActivatedRoute,
-        private courseService: CourseService,
+       // private courseService: CourseService,
         private moduleService: ModuleService,
         private router: Router,
         private cd: ChangeDetectorRef
@@ -29,7 +29,8 @@ export class ModuleDeleteComponent implements OnInit {
 
     ngOnInit() {
         let id = this.route.snapshot.paramMap.get("id");
-        this.courseService.getModulAndActivitybyId(id).pipe(takeUntil(this.unsubscribe))
+        this.moduleService.GetModule(id)
+        .pipe(takeUntil(this.unsubscribe))
             .subscribe(
                 tmodule => {
                     this.module_delete = tmodule;
@@ -53,9 +54,14 @@ export class ModuleDeleteComponent implements OnInit {
             .pipe(takeUntil(this.unsubscribe))
             .subscribe(s => {
                 this.cd.markForCheck();
-                this.router.navigate(['/courses', this.courseid]);     //Todo
+             //   this.router.navigate(['/courses', this.courseid]);     //Todo
             });
     }
+    
+    ngOnDestroy(): void {
+        this.unsubscribe.next();
+        this.unsubscribe.complete();
+      }
+    
 }
-
 

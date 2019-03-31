@@ -47,7 +47,7 @@ namespace LMS_1_1.Controllers
 
         // GET: api/Module1/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Module>> GetModuleById(string id)
         {
             Guid idG = Guid.Parse(id);
@@ -63,7 +63,7 @@ namespace LMS_1_1.Controllers
         }
         // POST: api/Module1
         [HttpPost("PostModule")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Module>> PostModule([FromBody] ModuleViewModel modelVm)
         {
             if (!ModelState.IsValid)
@@ -85,18 +85,19 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Module1/5
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<LMSActivity>>  Put(string id, [FromBody]  ModuleViewModel modelVm)
+       
+        [HttpPut("Edit/{id}")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<LMSActivity>>  Edit(string id, [FromBody]  ModuleViewModel modelVm)
         {
             //if (editModel.criD==null)
             if (id != modelVm.Id.ToString())
             {
                 return BadRequest();
             }
-
+            //MoveModule(ModuleViewModel modelVm)
+          
             //  Guid Crid = new Guid(activtyVm.id);
-
             Module module = new Module
             {
                 Id = Guid.Parse(modelVm.Id),
@@ -128,32 +129,88 @@ namespace LMS_1_1.Controllers
 
             return NoContent();
         }
-        // DELETE: api/module1/5
-        [HttpDelete("{id}")]
-        public async Task Delete(Guid iD)
+
+        
+        // PUT: api/Module1/5
+        [HttpPut("Move/{id}")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<LMSActivity>> Move(string id, [FromBody]  ModuleViewModel modelVm)
         {
+            //if (editModel.criD==null)
+            if (id != modelVm.Id.ToString())
+            {
+                return BadRequest();
+            }
+
+            //  Guid Crid = new Guid(activtyVm.id);
+            await _programrepository.MoveModule(modelVm);
+            Module module = new Module
+            {
+                Id = Guid.Parse(modelVm.Id),
+                Name = modelVm.Name,
+                StartDate = modelVm.StartDate,
+                EndDate = modelVm.EndDate,
+                Description = modelVm.Description,
+                CourseId = modelVm.CourseId
+            };
+
+            _context.Entry(module).State = EntityState.Modified;
+
             try
             {
-
-
-                var module = await _context.Modules.FindAsync(iD);
-                if (module == null)
-                {
-                    return;
-                }
-
-                _context.Modules.Remove(module);
                 await _context.SaveChangesAsync();
+
             }
-            catch(Exception ex)
+            catch (DbUpdateConcurrencyException)
             {
-                Console.WriteLine(ex.Message);
+                if (!ModuleExists(module.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
+
+            return NoContent();
+        }
+        
+
+        // DELETE: api/module1/5
+        [HttpDelete("{id}")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<bool>>  Delete(Guid iD)
+        {
+            var status = await _programrepository.RemoveModuleHelperAsync(iD);
+            if (status)
+            {
+                try
+                {
+
+
+                    var module = await _context.Modules.FindAsync(iD);
+                    if (module == null)
+                    {
+                        return NotFound();
+                    }
+
+                    _context.Modules.Remove(module);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                return Ok(true);      //Send back 200.
+            }
+            else
+                return StatusCode(500);
         }
 
 
         [HttpPost("TestIfInRange")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<bool>> TestIfInRange([FromBody] DubbParas parmas)
         {
             bool res = false;

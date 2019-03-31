@@ -139,14 +139,21 @@ ngOnInit(): void {
     private httpOptions;
   public getAuthHeader() : HttpHeaders
   {
+    if(this.isAuthenticated)
+      return  new HttpHeaders({ "Authorization": "Bearer " + this.Realtoken });
+    else  
     return  new HttpHeaders({ "Authorization": "Bearer " + this.Realtoken });
   }
 
+  public getToken() : string
+  {
+    if(this.isAuthenticated)
+      return  this.Realtoken ;
+    else  
+    return   this.Realtoken ;
+  }
 
 
-    public getToken(){
-        return this.Realtoken;
-    }
 
    
   

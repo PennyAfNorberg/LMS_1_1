@@ -17,6 +17,7 @@ export class ModuleService implements OnDestroy {
     private unsubscribe: Subject<void> = new Subject();
 
     private getAuthHeader(): HttpHeaders {
+        this.AuthService.isAuthenticated;
         return new HttpHeaders({ "Authorization": "Bearer " + this.token });
     }
 
@@ -50,8 +51,8 @@ export class ModuleService implements OnDestroy {
             );
     }
 
-    EditCreateModule(id: Guid, Module: IModule): any {
-        return this.http.put(this.moduleUrl+ "/" + id, Module,
+    EditModule(id: Guid, Module: IModule): any {
+        return this.http.put(this.moduleUrl+ "/Edit/" + id, Module,
         {
             headers: this.getAuthHeader()
         }).pipe(
@@ -60,7 +61,7 @@ export class ModuleService implements OnDestroy {
         );
       }
 
-
+    
       GetModule(Moduleid: string):  Observable<IModule>  {
         return this.http.get<IModule>(this.moduleUrl+"/"+Moduleid,
         {headers: this.getAuthHeader() 

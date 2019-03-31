@@ -9,6 +9,7 @@ import { takeUntil } from 'rxjs/operators';
 import { PartipantService } from 'ClientApp/app/AddPartipant/partipant.service';
 import { LoginMessageHandlerService } from 'ClientApp/app/Login/login-message-handler.service';
 
+
 @Component({
  
   templateUrl: './course-detail.component.html',
@@ -40,6 +41,7 @@ export class CourseDetailComponent implements OnInit, OnDestroy  {
           });*/
         let id: string = this.route.snapshot.paramMap.get('id');
         this.messhandler.SendCourseid(id);
+        this.messhandler.SendWeek(new Date());
         
         this.CourseService.getCourseAndModulebyId(id)
         .pipe(takeUntil(this.unsubscribe))

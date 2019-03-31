@@ -39,7 +39,7 @@ namespace LMS_1_1.Controllers
         [Authorize]
         public async Task<IActionResult> Home(Guid id)
         {
-            return View(await _repository.GetCourseByIdAsync(id, true));
+            return View(await _repository.GetCourseByIdAllAsync(id));
 
         }
         // GET: Courses
@@ -58,7 +58,7 @@ namespace LMS_1_1.Controllers
             {
                 return NotFound();
             }
-            var course = await _repository.GetCourseByIdAsync(id, true);
+            var course = await _repository.GetCourseByIdAllAsync(id);
             if (course == null)
             {
                 return NotFound();
@@ -67,7 +67,7 @@ namespace LMS_1_1.Controllers
         }
 
         // GET: Courses/Create
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public IActionResult Create()
         {
             return View();
@@ -78,7 +78,7 @@ namespace LMS_1_1.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<IActionResult> Create([Bind("Id,Name,StartDate,Description")] Course course)
         {
             if (ModelState.IsValid)
@@ -99,7 +99,7 @@ namespace LMS_1_1.Controllers
                 return NotFound();
             }
 
-            var course = await _repository.GetCourseByIdAsync(id, false);
+            var course = await _repository.GetCourseByIdAsync(id);
             /* var course = await _context.Courses.FindAsync(id);*/
             if (course == null)
             {
@@ -111,7 +111,7 @@ namespace LMS_1_1.Controllers
         // POST: Courses/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, [Bind("Id,Name,StartDate,Description")] Course course)
@@ -152,7 +152,7 @@ namespace LMS_1_1.Controllers
             {
                 return NotFound();
             }
-            var course = await _repository.GetCourseByIdAsync(id, false);
+            var course = await _repository.GetCourseByIdAsync(id);
             if (course == null)
             {
                 return NotFound();
@@ -163,12 +163,12 @@ namespace LMS_1_1.Controllers
 
 
         // POST: Courses/Delete/5
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var course = await _repository.GetCourseByIdAsync(id, false);
+            var course = await _repository.GetCourseByIdAsync(id);
             _repository.RemoveEntity(course);
             await _repository.SaveAllAsync();
             return RedirectToAction(nameof(Index));
@@ -186,7 +186,7 @@ namespace LMS_1_1.Controllers
             foreach (var item in cs)
             {
                 var courseStu = new ShowStudent();
-                var thecourse = await _repository.GetCourseByIdAsync(item.CourseId, false);
+                var thecourse = await _repository.GetCourseByIdAsync(item.CourseId);
                 courseStu.CourseID = item.CourseId;
                 courseStu.CourseName = thecourse.Name;
                 courseStu.StudentID = User.Identity.Name;

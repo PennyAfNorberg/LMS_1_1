@@ -22,6 +22,7 @@ export class EditComponent implements OnInit, OnDestroy {
   Activityid: string="";
   ActivityTypes:IActivityType[];
   Courseid: string ="";
+  private startstartdate: Date;
 
   constructor(private db: AuthService
     , private cd: ChangeDetectorRef ,private route: ActivatedRoute
@@ -33,45 +34,64 @@ export class EditComponent implements OnInit, OnDestroy {
     this.messhandler.Modulid
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status => 
+      { 
+        if (status != null) 
+        {
        // let tmpguid= Guid.parse(status); 
-        this.Activity.moduleid=status;
-        this.cd.markForCheck();
-      }
-    )
+          this.Activity.moduleid=status;
+        }
+      this.cd.markForCheck();
+    }
+
+    );
     this.messhandler.Courseid
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status =>{if (status!= null)
+         {
        // let tmpguid= Guid.parse(status); 
         this.Courseid=status;
-        this.cd.markForCheck();
+        
       }
+      this.cd.markForCheck();
+    }
+
     )
 
     this.messhandler.ModulStartDate
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status =>{if (status!= null) 
+        {
         this.Modulestartdate=status;
-        this.cd.markForCheck();
+        
       }
+      this.cd.markForCheck();
+    }
     )
     this.messhandler.ModulEndDate
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
-      status => {
+      status =>{ if(status!= null) 
+      {
         this.Moduleenddate=status;
-        this.cd.markForCheck();
       }
+        this.cd.markForCheck();
+    }
+  
     )
     this.messhandler.ModulName
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
       status => {
+         if(status!= null)
+         {
         this.ModuleName=status;
-        this.cd.markForCheck();
+        
       }
+      this.cd.markForCheck();
+    }
     )
     this.ActivititesService.getActitityTypes()
     .pipe(takeUntil(this.unsubscribe))
@@ -87,6 +107,7 @@ export class EditComponent implements OnInit, OnDestroy {
         resp =>  
         { 
           this.Activity=resp;
+          this.startstartdate=resp.startDate;
           this.cd.markForCheck();
         });
   }
@@ -117,13 +138,38 @@ export class EditComponent implements OnInit, OnDestroy {
         this.messhandler.SendDubbType("Activity");
         this.messhandler.SendDubbStart(startdatework);
         this.messhandler.SendDubbEnd(enddatework);
+        this.messhandler.SendWeek(startdatework);
      }
   
     // post data
   }
-  public Register(theForm):void
+
+  public move(): void
   {
-    this.errorMessage = "";
+     // Send to service => backend add diff date to all later once, change also start timdes to other with thesame start time
+     this.errorMessage = "";
+     this.validate();
+
+     if(this.errorMessage=="")
+     {
+      if (this.startstartdate!=this.Activity.startDate )
+      this.errorMessage=this.errorMessage+" Startdate change don't apply too move neighbor, however it will update this activity";
+   
+       this.ActivititesService.MoveActivity(this.Activity.id,this.Activity )
+       .pipe(takeUntil(this.unsubscribe))
+       .subscribe( status =>
+         {
+           this.errorMessage="Module updated"
+           this.cd.markForCheck();
+         }
+         ,err =>  this.errorMessage = <any>err
+         
+         )
+     }
+  }
+
+  private validate(): void
+  {
     if(new Date(this.Activity.startDate+":00").valueOf()<this.Modulestartdate.valueOf()+1)
     {
         let asd=this.Activity.startDate.valueOf();
@@ -146,6 +192,12 @@ export class EditComponent implements OnInit, OnDestroy {
     {
       this.errorMessage= this.errorMessage +" A module must end after it's start";
     } 
+  }
+
+  public Register(theForm):void
+  {
+    this.errorMessage = "";
+    this.validate();
     if(this.errorMessage=="")
     {
       this.ActivititesService.EditActivity(this.Activity.id,this.Activity)

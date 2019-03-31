@@ -19,6 +19,8 @@ namespace LMS_1_1.Data
     {
         public string UserName { get; set; }
         public string PassWord { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 
     public static class SeedData
@@ -56,17 +58,17 @@ namespace LMS_1_1.Data
                     }
                 }
                 // teachers
-                var Temails = admins.Select(u => u.UserName);
-                foreach (var email in Temails)
+                var Temails = admins;//.Select(u => u.UserName);
+                foreach (var Teach in Temails)
                 {
-                    if ((await userManager.FindByEmailAsync(email)) != null) continue;
-                    var user = new LMSUser { UserName = email, Email = email };
-                    var result = await userManager.CreateAsync(user, admins.Where(u => u.UserName == email).Select(u => u.PassWord).FirstOrDefault());
+                    if ((await userManager.FindByEmailAsync(Teach.UserName)) != null) continue;
+                    var user = new LMSUser { UserName = Teach.UserName, Email = Teach.UserName, FirstName= Teach.FirstName, LastName= Teach.LastName };
+                    var result = await userManager.CreateAsync(user, Teach.PassWord);
                     if (!result.Succeeded)
                     {
                         throw new Exception(string.Join("\n", result.Errors));
                     }
-                    var adminUser = await userManager.FindByNameAsync(email);
+                    var adminUser = await userManager.FindByNameAsync(Teach.UserName);
                     if ((await userManager.GetRolesAsync(adminUser)).Count() == 0)
                     {
                         var ok = await userManager.AddToRoleAsync(adminUser, ConstDefine.R_TEACHER);
@@ -78,17 +80,17 @@ namespace LMS_1_1.Data
 
                 }
 
-                var Semails = users.Select(u => u.UserName);
-                foreach (var email in Semails)
+                var Semails = users;//.Select(u => u.UserName);
+                foreach (var Student in Semails)
                 {
-                    if ((await userManager.FindByEmailAsync(email)) != null) continue;
-                    var user = new LMSUser { UserName = email, Email = email };
-                    var result = await userManager.CreateAsync(user, users.Where(u => u.UserName == email).Select(u => u.PassWord).FirstOrDefault());
+                    if ((await userManager.FindByEmailAsync(Student.UserName)) != null) continue;
+                    var user = new LMSUser { UserName = Student.UserName, Email = Student.UserName, FirstName = Student.FirstName, LastName = Student.LastName };
+                    var result = await userManager.CreateAsync(user, Student.PassWord);
                     if (!result.Succeeded)
                     {
                         throw new Exception(string.Join("\n", result.Errors));
                     }
-                    var adminUser = await userManager.FindByNameAsync(email);
+                    var adminUser = await userManager.FindByNameAsync(Student.UserName);
                     if ((await userManager.GetRolesAsync(adminUser)).Count() == 0)
                     {
                         var ok = await userManager.AddToRoleAsync(adminUser, ConstDefine.R_STUDENT);
@@ -112,11 +114,11 @@ namespace LMS_1_1.Data
 
                     if (context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "Programmering i C#") == null)
                     {
-                        await context.Modules.AddAsync(new Module { Name = "C#", Description = "Programmering i C#", StartDate = DateTime.Parse("2018-11-26 09:00:00"), EndDate = DateTime.Parse("2018-12-07 17:00:00"), CourseId = courseid.Value });
+                        await context.Modules.AddAsync(new Module { Name = "C#1", Description = "Programmering i C#", StartDate = DateTime.Parse("2018-11-26 09:00:00"), EndDate = DateTime.Parse("2018-12-07 17:00:00"), CourseId = courseid.Value });
 
                         await context.SaveChangesAsync();
                     }
-                    var moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "Programmering i C#")?.Id;
+                    var moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#1" && u.Description == "Programmering i C#")?.Id;
 
 
                     if (context.LMSActivity.FirstOrDefault(a => a.ModuleId == moduleid) == null)
@@ -142,12 +144,12 @@ namespace LMS_1_1.Data
 
                     if (context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "C#") == null)
                     {
-                        await context.Modules.AddAsync(new Module { Name = "C#", Description = "C#", StartDate = DateTime.Parse("2018-12-10 09:00:00"), EndDate = DateTime.Parse("2018-12-14 17:00:00"), CourseId = courseid.Value });
+                        await context.Modules.AddAsync(new Module { Name = "C#2", Description = "C#", StartDate = DateTime.Parse("2018-12-10 09:00:00"), EndDate = DateTime.Parse("2018-12-14 17:00:00"), CourseId = courseid.Value });
 
                         await context.SaveChangesAsync();
                     }
 
-                    moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "C#")?.Id;
+                    moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#2" && u.Description == "C#")?.Id;
 
                     if (context.LMSActivity.FirstOrDefault(a => a.ModuleId == moduleid) == null)
                     {
@@ -168,11 +170,11 @@ namespace LMS_1_1.Data
 
                     if (context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "Testning") == null)
                     {
-                        await context.Modules.AddAsync(new Module { Name = "C#", Description = "Testning", StartDate = DateTime.Parse("2018-12-17 09:00:00"), EndDate = DateTime.Parse("2018-12-18 17:00:00"), CourseId = courseid.Value });
+                        await context.Modules.AddAsync(new Module { Name = "C#3", Description = "Testning", StartDate = DateTime.Parse("2018-12-17 09:00:00"), EndDate = DateTime.Parse("2018-12-18 17:00:00"), CourseId = courseid.Value });
                         await context.SaveChangesAsync();
                     }
 
-                    moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "Testning")?.Id;
+                    moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#3" && u.Description == "Testning")?.Id;
 
                     if (context.LMSActivity.FirstOrDefault(a => a.ModuleId == moduleid) == null)
                     {
@@ -187,10 +189,10 @@ namespace LMS_1_1.Data
 
                     if (context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "Garage 1.0") == null)
                     {
-                        await context.Modules.AddAsync(new Module { Name = "C#", Description = "Garage 1.0", StartDate = DateTime.Parse("2018-12-19 09:00:00"), EndDate = DateTime.Parse("2019-01-02 17:00:00"), CourseId = courseid.Value });
+                        await context.Modules.AddAsync(new Module { Name = "C#4", Description = "Garage 1.0", StartDate = DateTime.Parse("2018-12-19 09:00:00"), EndDate = DateTime.Parse("2019-01-02 17:00:00"), CourseId = courseid.Value });
                         await context.SaveChangesAsync();
                     }
-                    moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#" && u.Description == "Garage 1.0")?.Id;
+                    moduleid = context.Modules.FirstOrDefault(u => u.CourseId == courseid && u.Name == "C#4" && u.Description == "Garage 1.0")?.Id;
 
                     if (context.LMSActivity.FirstOrDefault(a => a.ModuleId == moduleid) == null)
                     {

@@ -35,19 +35,29 @@
                     <b>File:  </b>
                     <label for="courseImgPath" class="control-label">{{editCourse.courseImgPath}}</label>
                     <input type="file" #fileInput [(ngModel)]="editCourse.courseImgPath" name="courseImgPath" class="form-control" 
-                           id="selectedFile" style="display: none;"/>
+                           id="selectedFile" accept='image/*' (change)="preview(fileInput.files)" style="display: none;"/>
                     <div style="padding-left:20px"></div>
                     <input type="button" value=" Select a file " onclick="document.getElementById('selectedFile').click();" class="btn-secondary" />
                     <!--<input type="file" name="coursePath" class="form-control" />-->
                 </div>
                 <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-primary" />
-                </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="submit" value="Save" class="btn btn-primary" />
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-info" [routerLink]="['/courses']" title="Back to List"><i class="fa fa-2x fa-arrow-circle-left"></i></a>
+                            </div>
+                        </div>
+                </div>     
         </form>
     </div>
-</div>
+
 
 <div>
-    <a class="btn btn-info" [routerLink]="['/courses']" title="Back to List"><i class="fa fa-2x fa-arrow-circle-left"></i></a>
+        <div class="col-md-4">
+                <div>
+                    <img [src]="imgURL" height="200" *ngIf="imgURL">
+                </div> 
 </div>
-
+</div>

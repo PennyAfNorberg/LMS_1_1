@@ -89,7 +89,7 @@ namespace LMS_1_1.Controllers
                 return BadRequest(ModelState);
             }
             string path = _repository.GetDocumentUploadPath();
-           string fileName= await _repository.UploadFile(documentVm.FileData,path);
+           string fileName=  _repository.UploadFile(documentVm.FileData,path);
             if(fileName!=null)
                 {
                 Document document = new Document
@@ -107,7 +107,7 @@ namespace LMS_1_1.Controllers
                 };
                 await _repository.AddDocumentAsync(document);
 
-                _repository.SaveAllAsync();
+                await _repository.SaveAllAsync();
 
                 return CreatedAtAction("GetDocument", new { id = document.Id }, document);
             }
@@ -115,10 +115,10 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpPost("DownloadFile"), DisableRequestSizeLimit]
-        public async Task<FileStream> DownloadFile (string fileName)
+        public FileStream DownloadFile (string fileName)
         {
             string folderpath = _repository.GetDocumentUploadPath();
-            return  await _repository.DownloadFile(folderpath, fileName);
+            return  _repository.DownloadFile(folderpath, fileName);
         }
 
         // DELETE: api/Documents1/5
@@ -133,7 +133,7 @@ namespace LMS_1_1.Controllers
             }
 
          
-            _repository.RemoveDocumentAsync(document);
+           await _repository.RemoveDocumentAsync(document);
           
 
             return Ok(document);

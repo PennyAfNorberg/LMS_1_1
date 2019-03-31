@@ -94,6 +94,7 @@ export class AddActivitiesWithModulIdComponent implements OnInit, OnDestroy {
         this.messhandler.SendDubbType("Activity");
         this.messhandler.SendDubbStart(new Date(this.Activity.startDate+":00.000Z"));
         this.messhandler.SendDubbEnd(new Date(this.Activity.endDate+":00.000Z"));
+        this.messhandler.SendWeek(new Date(this.Activity.startDate+":00.000Z"));
      }
   
     // post data

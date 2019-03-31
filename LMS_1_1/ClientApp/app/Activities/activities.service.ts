@@ -11,6 +11,7 @@ import { Guid } from 'guid-typescript';
 })
 export class ActivitiesService implements OnDestroy {
 
+
     private activityUrl = "https://localhost:44396/api/activity1";
     private token: string = "";
     private unsubscribe: Subject<void> = new Subject();
@@ -24,6 +25,7 @@ export class ActivitiesService implements OnDestroy {
 
 
     private getAuthHeader(): HttpHeaders {
+        this.AuthService.isAuthenticated;
         return new HttpHeaders({ "Authorization": "Bearer " + this.token });
     }
 
@@ -50,7 +52,7 @@ export class ActivitiesService implements OnDestroy {
 
 
     EditActivity(id: Guid, Activity: IActivity): any {
-        return this.http.put(this.activityUrl + "/" + id, Activity,
+        return this.http.put(this.activityUrl + "/Edit/" + id, Activity,
             {
                 headers: this.getAuthHeader()
             }).pipe(
@@ -58,6 +60,16 @@ export class ActivitiesService implements OnDestroy {
                 catchError(this.handleError)
             );
     }
+
+    MoveActivity(id: Guid, Activity: IActivity): any {
+        return this.http.put(this.activityUrl + "/Move/" + id, Activity,
+            {
+                headers: this.getAuthHeader()
+            }).pipe(
+                tap(result => JSON.stringify(result)),
+                catchError(this.handleError)
+            );
+      }
 
     GetActivity(Activityid: string): Observable<Activity> {
         return this.http.get<Activity>(this.activityUrl + "/" + Activityid,

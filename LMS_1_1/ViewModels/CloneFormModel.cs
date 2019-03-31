@@ -13,7 +13,8 @@ namespace LMS_1_1.ViewModels
         public DateTime NewDate { get; set; }
         public string Description { get; set; }
         public IFormFile FileData { get; set; }
-    
+
+        public int CloneTypeId { get; set; }
         public Guid? NewCourseId { get; set; }
     }
 
@@ -58,13 +59,13 @@ namespace LMS_1_1.ViewModels
 
         public string LMSUserId { get; set; }
   
-        public Guid CourseId { get; set; }
+        public Guid? CourseId { get; set; }
         public Guid? NewCourseId { get; set; }
     
-        public Guid ModuleId { get; set; }
+        public Guid? ModuleId { get; set; }
         public Guid? NewModuleId { get; set; }
         
-        public Guid LMSActivityId { get; set; }
+        public Guid? LMSActivityId { get; set; }
         public Guid? NewLMSActivityId { get; set; }
       
 

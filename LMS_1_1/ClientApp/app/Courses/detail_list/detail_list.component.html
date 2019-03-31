@@ -23,8 +23,8 @@
                     
                 
                 <div class="col-6 somepadding">
-                        <h5 class="mb-0  btn btn-info"> 
-                        <a [routerLink]="['/Modules/', module.id]" title="Detail info"> <i class="fa fa-1x fa-info"></i></a>
+                        <h5 class="mb-0"> 
+                        <a class="btn btn-info" [routerLink]="['/Modules/', module.id]" title="Detail info"> <i class="fa fa-1x fa-info"></i></a>
                     </h5>
                      </div>
                     </div>
@@ -57,7 +57,7 @@
                                     <br> {{activity.activityType}}
                                 </p>
 
-                                <p style="text-align:right"> <small>  <b>{{activity.startDate |date: 'yyyy-MM-dd hh:mm:ss'}} </b>  </small></p>
+                                <p style="text-align:right"> <small>  <b>{{activity.startDate |date: 'yyyy-MM-dd HH:mm:ss'}} </b>  </small></p>
                             </div>
                             <div *ngIf="isTeacher">
                                 <a [routerLink]="['/Activities/edit', activity.id]" [title]="'Edit activity '+activity.name" style="margin-left:5px" class="btn btn-info"> <i class="fa fa-1x fa-edit"></i></a>&nbsp; 

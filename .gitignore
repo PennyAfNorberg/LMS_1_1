@@ -25,7 +25,8 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-wwwroot/clientapp
+wwwroot/clientapp/*
+dist/*
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -272,10 +273,14 @@ __pycache__/
 /LMS_1_1/ClientApp/assets/img/images.jpg
 /LMS_1_1/ClientApp/assets/img/No_idea (3).jpg
 /LMS_1_1/ClientApp/assets/img
-/SQLQuery9.sql
+/*.sql
 /LMS_1_1/wwwroot/clientapp/dist/assets/img
 /LMS_1_1/Attachements/Documents/Kolla in for refreashtoken (3).txt
 /LMS_1_1/Attachements/Documents/Kolla in for refreashtoken (4).txt
 /LMS_1_1/Attachements/Documents/Kolla in for refreashtoken (6).txt
 /LMS_1_1/Attachements/Documents/Kolla in for refreashtoken (5).txt
+/LMS_1_1/wwwroot/clientapp
+/LMS_1_1/Migrations/20190327165124_IdontLikeThis.cs
+/LMS_1_1/Migrations/20190327165124_IdontLikeThis.Designer.cs
+/LMS_1_1/Attachements/Documents
 /LMS_1_1/wwwroot/clientapp/out-tsc/app/Schedule

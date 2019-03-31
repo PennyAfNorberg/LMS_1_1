@@ -15,7 +15,7 @@ namespace LMS_1_1.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -59,6 +59,118 @@ namespace LMS_1_1.Migrations
                         });
                 });
 
+            modelBuilder.Entity("LMS_1_1.Models.CloneType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CloneTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Skip weekends"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "don't skip weekends"
+                        });
+                });
+
+            modelBuilder.Entity("LMS_1_1.Models.ColorActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("AktivityTypeID");
+
+                    b.Property<string>("Color")
+                        .IsRequired();
+
+                    b.Property<Guid?>("CourseId");
+
+                    b.Property<Guid?>("LMSActivityId");
+
+                    b.Property<string>("LMSUserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("LMSActivityId");
+
+                    b.HasIndex("LMSUserId");
+
+                    b.ToTable("ColorActivity");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("a621799a-47b2-45e8-8d1f-2f256fb68a0a"),
+                            AktivityTypeID = 1,
+                            Color = "#587aad"
+                        },
+                        new
+                        {
+                            Id = new Guid("02422a7d-99ec-40e2-bd1b-8bf4473a9cf2"),
+                            AktivityTypeID = 2,
+                            Color = "#68c930"
+                        },
+                        new
+                        {
+                            Id = new Guid("2c7b43b8-06aa-412d-8c09-5eb00b1425e4"),
+                            AktivityTypeID = 3,
+                            Color = "#c95e30"
+                        },
+                        new
+                        {
+                            Id = new Guid("b9b95bd2-7820-45d9-9354-8dd9437fd9bd"),
+                            AktivityTypeID = 4,
+                            Color = "#f45004"
+                        },
+                        new
+                        {
+                            Id = new Guid("450dbee0-90bd-4245-a45d-087881ceaa4d"),
+                            AktivityTypeID = 5,
+                            Color = "#fcfaf9"
+                        });
+                });
+
+            modelBuilder.Entity("LMS_1_1.Models.ColorModule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Color")
+                        .IsRequired();
+
+                    b.Property<string>("LMSUserId");
+
+                    b.Property<Guid?>("ModuleId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LMSUserId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("ColorModule");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d9a5a7b1-5e72-43bc-839c-26a65c2869d7"),
+                            Color = "#dbad95"
+                        });
+                });
+
             modelBuilder.Entity("LMS_1_1.Models.Course", b =>
                 {
                     b.Property<Guid>("Id")
@@ -77,6 +189,40 @@ namespace LMS_1_1.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("LMS_1_1.Models.CourseSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<Guid?>("CourseId");
+
+                    b.Property<DateTime?>("Date");
+
+                    b.Property<string>("EndTime");
+
+                    b.Property<string>("StartTime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("dee8ad3e-18fe-414d-8a1d-9461a5e00b84"),
+                            EndTime = "12:00:00",
+                            StartTime = "09:00:00"
+                        },
+                        new
+                        {
+                            Id = new Guid("0ae1450b-86f5-45f6-8f2c-bfc0a2f3292a"),
+                            EndTime = "17:00:00",
+                            StartTime = "13:00:00"
+                        });
                 });
 
             modelBuilder.Entity("LMS_1_1.Models.CourseUser", b =>
@@ -141,6 +287,23 @@ namespace LMS_1_1.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DocumentTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Course"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Activity"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Module"
+                        });
                 });
 
             modelBuilder.Entity("LMS_1_1.Models.LMSActivity", b =>
@@ -379,6 +542,39 @@ namespace LMS_1_1.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("LMS_1_1.Models.ColorActivity", b =>
+                {
+                    b.HasOne("LMS_1_1.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId");
+
+                    b.HasOne("LMS_1_1.Models.LMSActivity", "LMSActivity")
+                        .WithMany()
+                        .HasForeignKey("LMSActivityId");
+
+                    b.HasOne("LMS_1_1.Models.LMSUser", "LMSUser")
+                        .WithMany()
+                        .HasForeignKey("LMSUserId");
+                });
+
+            modelBuilder.Entity("LMS_1_1.Models.ColorModule", b =>
+                {
+                    b.HasOne("LMS_1_1.Models.LMSUser", "LMSUser")
+                        .WithMany()
+                        .HasForeignKey("LMSUserId");
+
+                    b.HasOne("LMS_1_1.Models.Module", "Module")
+                        .WithMany()
+                        .HasForeignKey("ModuleId");
+                });
+
+            modelBuilder.Entity("LMS_1_1.Models.CourseSettings", b =>
+                {
+                    b.HasOne("LMS_1_1.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId");
                 });
 
             modelBuilder.Entity("LMS_1_1.Models.CourseUser", b =>

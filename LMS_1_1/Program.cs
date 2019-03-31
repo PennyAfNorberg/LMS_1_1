@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 
 namespace LMS_1_1
 {
@@ -40,22 +41,66 @@ namespace LMS_1_1
                  * 
                  * 
                  */
-                var Teachers = new UserData[]
+                var Teachers = new List<UserData>
                 {
                     new UserData{ UserName = config["Teachers:0:UserName"],
-                    PassWord = config["Teachers:0:PassWord"] }
+                            PassWord = config["Teachers:0:PassWord"],
+                            FirstName=config["Teachers:0:FirstName"],
+                            LastName=config["Teachers:0:LastName"],
+
+                    }
+                    
+
                 };
-                var Students = new UserData[]
+                int i = 1;
+                string s = config["Teachers:" + i.ToString() + ":UserName"];
+                while (!String.IsNullOrEmpty(s))
+                {
+                    Teachers.Add(new UserData
+                    {
+                        UserName = s,
+                        PassWord = config["Teachers:" + i.ToString() + ":PassWord"],
+                        FirstName = config["Teachers:" + i.ToString() + ":FirstName"],
+                        LastName = config["Teachers:" + i.ToString() + ":LastName"]
+                    }
+
+                        );
+
+                    i++;
+                    s = config["Teachers:" + i.ToString() + ":UserName"];
+                }
+
+                var Students = new List<UserData>
                 {
                    new UserData{ UserName = config["Students:0:UserName"],
-                    PassWord = config["Students:0:PassWord"] }
-                };
+                        PassWord = config["Students:0:PassWord"],
+                        FirstName=config["Student:0:FirstName"],
+                        LastName=config["Student:0:LastName"],
 
+                   }
+                };
+                i = 1;
+                s = config["Students:" + i.ToString() + ":UserName"];
+                while (!String.IsNullOrEmpty(s))
+                {
+                    Students.Add(new UserData
+                    {
+                        UserName = s,
+                        PassWord = config["Students:" + i.ToString() + ":PassWord"],
+                        FirstName = config["Students:" + i.ToString() + ":FirstName"],
+                        LastName = config["Students:" + i.ToString() + ":LastName"]
+                    }
+
+                        );
+
+                    i++;
+                    s = config["Students:" + i.ToString() + ":UserName"];
+                }
 
 
                 try
                 {
-                    SeedData.Initialize(services, Teachers, Students).Wait();
+                    SeedData.Initialize(services, Teachers.ToArray(), Students.ToArray()).Wait();
                 }
                 catch (Exception ex)
                 {

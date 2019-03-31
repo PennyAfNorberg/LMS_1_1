@@ -70,34 +70,65 @@ export class EditComponent implements OnInit, OnDestroy {
   {
      if(this.Module.startDate != null && this.Module.endDate != null)
      {
-        this.messhandler.SendDubbId(this.Module.courseid);
+
+      let startdatework:Date
+      if((this.Module.startDate.toLocaleString().length==16))
+      {
+        startdatework=new Date(this.Module.startDate+":00.000Z")
+      }
+      else
+      {
+        startdatework=this.Module.startDate;
+      }
+      let enddatework:Date
+      if((this.Module.endDate.toLocaleString().length==16))
+      {
+        enddatework=new Date(this.Module.endDate+":59.000Z")
+      }
+      else
+      {
+        enddatework=this.Module.endDate;
+      }
+      this.messhandler.SendDubbId(this.Module.courseid);
+      this.messhandler.SendDubbType("Module");
+      this.messhandler.SendDubbStart(startdatework);
+      this.messhandler.SendDubbEnd(enddatework);
+      this.messhandler.SendWeek(startdatework);
+
+    /*    this.messhandler.SendDubbId(this.Module.courseid);
         this.messhandler.SendDubbType("Module");
         this.messhandler.SendDubbStart(new Date(this.Module.startDate+":00.000Z"));
         this.messhandler.SendDubbEnd(new Date(this.Module.endDate+":00.000Z"));
+        */
      }
   
     // post data
   }
 
 
+
+private validate():void
+{
+  if(this.Module.startDate.valueOf()<this.coursestartdate.valueOf())
+  {
+      this.errorMessage= this.errorMessage + "Start date on module may not be before course start date ("+this.coursestartdate+")";
+  }
+  if(this.Module.endDate.valueOf()<this.coursestartdate.valueOf())
+  {
+      this.errorMessage= this.errorMessage + "End date on module may not be before course start date ("+this.coursestartdate+")";
+  } 
+  if(this.Module.endDate.valueOf()<this.Module.startDate.valueOf())
+  {
+    this.errorMessage= this.errorMessage +" A module must end after it's start";
+  }
+}
   public Register(theForm):void
   {
     this.errorMessage = "";
-    if(this.Module.startDate.valueOf()<this.coursestartdate.valueOf())
-    {
-        this.errorMessage= this.errorMessage + "Start date on module may not be before course start date ("+this.coursestartdate+")";
-    }
-    if(this.Module.endDate.valueOf()<this.coursestartdate.valueOf())
-    {
-        this.errorMessage= this.errorMessage + "End date on module may not be before course start date ("+this.coursestartdate+")";
-    } 
-    if(this.Module.endDate.valueOf()<this.Module.startDate.valueOf())
-    {
-      this.errorMessage= this.errorMessage +" A module must end after it's start";
-    } 
+    this.validate();
     if(this.errorMessage=="")
     {
-      this.ModuleService.EditCreateModule(this.Module.id,this.Module )
+      this.ModuleService.EditModule(this.Module.id,this.Module )
       .pipe(takeUntil(this.unsubscribe))
       .subscribe( status =>
         {

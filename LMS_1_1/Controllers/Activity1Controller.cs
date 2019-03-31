@@ -47,7 +47,7 @@ namespace LMS_1_1.Controllers
 
         // GET: api/Activity1/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<LMSActivity>> GetActivityById(string id)
         {
             Guid idG = Guid.Parse(id);
@@ -63,7 +63,7 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpGet("ActivityTypes")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<ICollection<ActivityType>>> GetActivityTypes()
         {
           return await  _context.ActivityTypes.ToListAsync();
@@ -73,7 +73,7 @@ namespace LMS_1_1.Controllers
         // POST: api/Activity1
         // POST: api/Module1
         [HttpPost("PostActivity")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         //public async Task<ActionResult<LMSActivity>> PostActivity([FromBody] dynamic activtyVm)
         public async Task<ActionResult<LMSActivity>> PostActivity([FromBody] ActivityFormModel activtyVm)
         {
@@ -97,9 +97,9 @@ namespace LMS_1_1.Controllers
         }
 
         // PUT: api/Activity1/5
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<LMSActivity>> Put(string id, [FromBody] ActivityFormModel activtyVm)
+        [HttpPut("Edit/{id}")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<LMSActivity>> Edit(string id, [FromBody] ActivityFormModel activtyVm)
         {
             //if (editModel.criD==null)
             if (id != activtyVm.Id.ToString())
@@ -142,6 +142,32 @@ namespace LMS_1_1.Controllers
             return NoContent();
         }
 
+        [HttpPut("Move/{id}")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<LMSActivity>> Move(string id, [FromBody]  ActivityFormModel activtyVm)
+        {
+            //if (editModel.criD==null)
+            if (id != activtyVm.Id.ToString())
+            {
+                return BadRequest();
+            }
+
+            //  Guid Crid = new Guid(activtyVm.id);
+            var status= await _programrepository.MoveLMSActivity(activtyVm);
+
+            if(status)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return NotFound();
+            }
+
+
+            
+        }
+
         // DELETE: api/Activity1/5
         //[HttpDelete("{id}")]
         //[Authorize(Roles = "Teacher")]
@@ -164,25 +190,32 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Teacher")]
-        public async Task Delete(Guid iD)
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<bool>> Delete(Guid iD)
         {
-            var actv = await _context.LMSActivity.FindAsync(iD);
-            if (actv == null)
+            var status = await _programrepository.RemoveActivityHelperAsync(iD);
+            if (status)
             {
-                return;
-            }
-
-            //delete documents associated to it.
-         var acDocuments =await _documentrepository.GetDocumentsByIdOwnerAsync(iD);
-            foreach (Document doc in acDocuments)
-            {
-               await _documentrepository.RemoveDocumentAsync(doc);
-            }
+                var actv = await _context.LMSActivity.FindAsync(iD);
+                if (actv == null)
+                {
+                    return NotFound();
+                }
+/*
+                //delete documents associated to it.
+             var acDocuments =await _documentrepository.GetDocumentsByIdOwnerAsync(iD);
+                foreach (Document doc in acDocuments)
+                {
+                   await _documentrepository.RemoveDocumentAsync(doc);
+                }*/
           
 
-            _context.LMSActivity.Remove(actv);
-            _context.SaveChanges();
+                _context.LMSActivity.Remove(actv);
+                _context.SaveChanges();
+                return Ok(true);      //Send back 200.
+            }
+            else
+                return StatusCode(500);
         }
     }
 }

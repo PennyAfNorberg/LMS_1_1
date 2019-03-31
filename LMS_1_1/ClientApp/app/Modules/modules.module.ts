@@ -11,6 +11,7 @@ import { ModuleDeleteComponent } from './module-delete/module-delete.component';
 import { IsTeacherGuard } from '../Shared/is-teacher.guard';
 import { CheckIfDubbsComponent } from './Check-if-dubbs/check-if-dubbs.component';
 import { EditComponent } from '../Modules/edit/edit.component';
+import { ScheduleModule } from '../Schedule/schedule.module';
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import { EditComponent } from '../Modules/edit/edit.component';
     ReactiveFormsModule,
       FormsModule,
       DocumentsModule,
+      ScheduleModule,
     RouterModule.forChild(
         [
             {

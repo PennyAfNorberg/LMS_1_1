@@ -344,7 +344,7 @@ namespace LMS_1_1.Controllers
 
         // PUT: api/CourseUsers/5
         [HttpPut("{Courseid}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<IActionResult> PutCourseUser(Guid Courseid, CourseUser courseUser)
         {
             if (Courseid != courseUser.CourseId)
@@ -373,7 +373,7 @@ namespace LMS_1_1.Controllers
             return NoContent();
         }
         [HttpPost]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Boolean>> AddStudentsToCourse([FromBody] SaveUsercourseListViewmodel savecouseListViewmodel)
         {
             //  var user = await _userManager.FindByNameAsync(User.Identity.Name);
@@ -381,7 +381,7 @@ namespace LMS_1_1.Controllers
             // and SavecouseListViewmodel.Userids is list of courseids
             try
             {
-                await _repository.RemoveAllCourseUsersForUser(savecouseListViewmodel.Courseid);
+                await _repository.RemoveAllCourseUsersForCourse(savecouseListViewmodel.Courseid);
 
                 foreach (var userid in savecouseListViewmodel.Userids)
                 {
@@ -406,6 +406,7 @@ namespace LMS_1_1.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<string>> ToggleCourseUser(Guid CourseId, string UserId)
         {
             CourseUser courseUser = new CourseUser { CourseId = CourseId, LMSUserId = UserId };
@@ -442,7 +443,7 @@ namespace LMS_1_1.Controllers
 
         // POST: api/CourseUsers
         [HttpPost]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<CourseUser>> PostCourseUser(CourseUser courseUser)
         {
             _context.CourseUsers.Add(courseUser);
@@ -467,7 +468,7 @@ namespace LMS_1_1.Controllers
 
         // DELETE: api/CourseUsers/5
         [HttpDelete("{Courseid,LMSUserId}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<CourseUser>> DeleteCourseUser(Guid Courseid, string LMSUserId)
         {
             var courseUser = await _context.CourseUsers.FirstOrDefaultAsync(cu => cu.CourseId == Courseid && cu.LMSUserId == LMSUserId);

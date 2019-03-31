@@ -28,6 +28,7 @@ export class UploadDetailComponent implements OnInit,OnDestroy {
         this.subscription = this.DocumentService.getUplaodtStatus().subscribe(status => {
             if (status) {
                 this.loadDocument();
+        
             } 
         });
     }

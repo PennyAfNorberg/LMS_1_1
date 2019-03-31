@@ -72,8 +72,9 @@ namespace LMS_1_1.Controllers
         public async Task<ActionResult<Course>> GetCourse(string id)
         {
            Guid idG = Guid.Parse(id);
-            Course course = await _context.Courses.FindAsync(idG);
-            
+            Course course = await _programrepository.GetCourseByIdAsync(idG);
+
+
 
             if (course == null)
             {
@@ -86,115 +87,24 @@ namespace LMS_1_1.Controllers
         [HttpGet("All")]
         public async Task<ActionResult<CourseAllViewModel>> GetCourseAll(string id)
         {
-            //   Guid idG = Guid.Parse(id);
-  
-              var  course1 = await _context.Courses
-                            .Include(c => c.Modules)
-                            .ThenInclude(m => m.LMSActivities)
-                            .ThenInclude(a => a.ActivityType)
-                            .FirstOrDefaultAsync(c => c.Id.ToString() == id);
-
-
-
-            var Modules = new List<ModelAllViewModel>();
-            foreach (var Modul in course1.Modules)
-            {
-                var Activities = new List<ActivityViewModel>();
-                foreach (var Actitivity in Modul.LMSActivities)
-                {
-                    Activities.Add(
-                            new ActivityViewModel
-                            {
-                                Id = Actitivity.Id,
-                                Name = Actitivity.Name,
-                                StartDate = Actitivity.StartDate,
-                                EndDate = Actitivity.EndDate,
-                                Description = Actitivity.Description,
-                                ActivityType = Actitivity.ActivityType.Name,
-                                Name2 = (Guid.NewGuid()).ToString(),
-                                isExpanded = ""
-
-                            }
-
-                        );
-                }
-
-                Modules.Add(
-                     new ModelAllViewModel
-                     {
-                         Id = Modul.Id,
-                         Name = Modul.Name,
-                         StartDate = Modul.StartDate,
-                         EndDate = Modul.EndDate,
-                         Description = Modul.Description,
-                         Activities = (ICollection<ActivityViewModel>)Activities,
-                         Name2=(Guid.NewGuid()).ToString(),
-                        // Name2 = "C" + (i++).ToString(),
-                         isExpanded = ""
-                     }
-                    );
-            }
-
-            CourseAllViewModel course = new CourseAllViewModel
-            {
-                Id = course1.Id,
-                Name = course1.Name,
-                StartDate = course1.StartDate,
-                Description = course1.Description,
-                courseImgPath = course1.CourseImgPath,
-                Modules = Modules
-            };
-
-
+               Guid idG = Guid.Parse(id);
+            var course = await _programrepository.GetCourseByIdAllAsync(idG);
             if (course == null)
             {
                 return NotFound();
             }
 
             return Ok(course);
+
+
         }
 
         [HttpGet("CAndM")]
         public async Task<ActionResult<CourseAllViewModel>> GetCourseAndModule(string id)
         {
-            //   Guid idG = Guid.Parse(id);
-            var course1 = await _context.Courses
-                          .Include(c => c.Modules)
-                          .FirstOrDefaultAsync(c => c.Id.ToString() == id);
+               Guid idG = Guid.Parse(id);
 
-
-
-            var Modules = new List<ModelAllViewModel>();
-            foreach (var Modul in course1.Modules)
-            {
-                
-
-                Modules.Add(
-                     new ModelAllViewModel
-                     {
-                         Id = Modul.Id,
-                         Name = Modul.Name,
-                         StartDate = Modul.StartDate,
-                         EndDate = Modul.EndDate,
-                         Description = Modul.Description,
-                         Activities = null,
-                         Name2=(Guid.NewGuid()).ToString(),
-                        // Name2 = "C" + (i++).ToString(),
-                         isExpanded = ""
-                     }
-                    );
-            }
-
-            CourseAllViewModel course = new CourseAllViewModel
-            {
-                Id = course1.Id,
-                Name = course1.Name,
-                StartDate = course1.StartDate,
-                Description = course1.Description,
-                courseImgPath = course1.CourseImgPath,
-                Modules = Modules
-            };
-
+            var course = await _programrepository.GetCourseAndModule(idG);
 
             if (course == null)
             {
@@ -207,32 +117,8 @@ namespace LMS_1_1.Controllers
         [HttpGet("AfromMid")]
         public async Task<ActionResult<ICollection<ActivityViewModel>>> GetActivitiesFromModulid(string id)
         {
-            //   Guid idG = Guid.Parse(id);
-            var Activities =await  _context.LMSActivity
-                           .Include(a => a.ActivityType)
-                          .Where(a => a.ModuleId.ToString() == id)
-                          .ToArrayAsync();
-                          
-
-
-
-            var res = new List<ActivityViewModel>();
-            foreach (var activity in Activities)
-            {
-
-
-                res.Add(
-                     new ActivityViewModel
-                     {
-                         Id = activity.Id,
-                         Name = activity.Name,
-                         StartDate = activity.StartDate,
-                         EndDate = activity.EndDate,
-                         Description = activity.Description,
-                         ActivityType = activity.ActivityType.Name
-                     }
-                    );
-            }
+            Guid idG = Guid.Parse(id);
+            var res = await _programrepository.GetActivitiesFromModulid(idG);
 
 
             if (res == null)
@@ -247,48 +133,9 @@ namespace LMS_1_1.Controllers
         [HttpGet("MAndAfromMid")]
         public async Task<ActionResult<ModelAllViewModel>> GetModulesAndActivitiesFromModulid(string id)
         {
-            //   Guid idG = Guid.Parse(id);
-    
-            var Module = await _context.Modules
-                            .Include(m => m.LMSActivities)
-                           .ThenInclude(a => a.ActivityType)
-                          .Where(m => m.Id.ToString() == id)
-                          .FirstOrDefaultAsync();
-
-
-
-
-            var res = new List<ActivityViewModel>();
-            foreach (var activity in Module.LMSActivities)
-            {
-
-
-                res.Add(
-                     new ActivityViewModel
-                     {
-                         Id = activity.Id,
-                         Name = activity.Name,
-                         StartDate = activity.StartDate,
-                         EndDate = activity.EndDate,
-                         Description = activity.Description,
-                         ActivityType = activity.ActivityType.Name,
-                         Name2 = (Guid.NewGuid()).ToString(),
-                         isExpanded = ""
-                     }
-                    );
-            }
-
-
-            ModelAllViewModel Module1 = new ModelAllViewModel
-            {
-                Id = Module.Id,
-                Name = Module.Name,
-                StartDate = Module.StartDate,
-                EndDate = Module.EndDate,
-                Description = Module.Description,
-                Activities = res,
-                CourseId=Module.CourseId
-            };
+              Guid idG = Guid.Parse(id);
+            var Module1 = await _programrepository.GetModulesAndActivitiesFromModulid(idG);
+            
 
             if (Module1 == null)
             {
@@ -297,210 +144,54 @@ namespace LMS_1_1.Controllers
 
             return Ok(Module1);
         }
+        [HttpGet("CloneTypes")]
+        public async Task<ActionResult<IEnumerable<CloneType>>> GetCloneTypes()
+        {
+            return await _context.CloneTypes.ToArrayAsync();
+        }
+
+        [HttpPost("ModulesWithColor")]
+        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetModulesWithColour([FromBody] ScheduleFormModel scheduleFormModel)
+        {
+            string userid = (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
+            var Entities = await _programrepository.GetModulesWithColour(scheduleFormModel, userid);
+            if (Entities == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Entities);
+        }
+        [HttpPost("ActivitiesWithColor")]
+        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetActivitiesWithColour([FromBody] ScheduleFormModel scheduleFormModel)
+        {
+            string userid = (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
+            var Entities = await _programrepository.GetActivitiesWithColour(scheduleFormModel, userid);
+            if (Entities == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(Entities);
+        }
 
         [HttpPost("Clone"), DisableRequestSizeLimit]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Course>> Clone([FromForm] CloneFormModel CloneFormModel )
         {
+
+
+
              string userid=  (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
-            var tempteacher = await _userManager.GetUsersInRoleAsync("Teacher");
-            var allteachers =tempteacher.Select(u => u.Id);
-            /*var config = new MapperConfiguration(cfg => {
+             var res= await _programrepository.CloneCourseAsync(CloneFormModel, userid);
 
-                 cfg.CreateMap<ICollection<Module>,List<CloneModuleModel>>();
-                 cfg.CreateMap<ICollection<LMSActivity>, List<CloneActivityModel>>();
-                 cfg.CreateMap<ICollection<Document>,List<CloneDocumentModel>>();
-               
-             });
-            IMapper iMapper = config.CreateMapper();*/
-
-            //CloneFormModel => old courseid, new start, new image may be null
-            // get course
-            var coursedata = await _context.Courses
-                            .Include(c => c.Modules)
-                            .ThenInclude(m => m.LMSActivities)
-                            .ThenInclude(a => a.ActivityType)
-                     
-
-                            .FirstOrDefaultAsync(c => CloneFormModel.Id == c.Id.ToString());
-            /// int datediff = ((TimeSpan) (CloneFormModel.NewDate - coursedata.StartDate).Days;
-            CloneFormModel.NewDate = CloneFormModel.NewDate;
-
-            DateTime dt = DateTime.Parse(CloneFormModel.NewDate.ToShortDateString());
-            DateTime dt1 = DateTime.Parse(coursedata.StartDate.ToShortDateString());
-
-            int noOfDays = (int) dt.Subtract(dt1).TotalDays; // dates to add
+            return Ok(res);
 
   
-
-            var tmpcourse = new Course
-            {
-
-                Name = CloneFormModel.Name,
-                Description = CloneFormModel.Description,
-                StartDate = CloneFormModel.NewDate,
-                CourseImgPath =(CloneFormModel.FileData==null)?coursedata.CourseImgPath :@"..\assets\img\" + CloneFormModel.FileData.FileName
-
-            };
-
-            // update course name and date
-            // add course, Save Old and new courseid
-            await _context.Courses.AddRangeAsync(tmpcourse);
-            await _context.SaveChangesAsync();
-            CloneFormModel.NewCourseId = tmpcourse.Id;
-
-            var cloneModules = new List<CloneModuleModel>();
-            var cloneActivities = new List<CloneActivityModel>();
-            foreach (var mod in coursedata.Modules)
-            {
-                Module tmp2 = new Module
-                {
-                    Name = mod.Name
-                  ,
-                    Description = mod.Description
-                  ,
-                    StartDate = mod.StartDate.AddDays(noOfDays)
-                  ,
-                    EndDate = mod.EndDate.AddDays(noOfDays)
-                  ,
-                    CourseId = CloneFormModel.NewCourseId.Value
-                };
-
-                // add modules Save old and new modulid
-                await _context.Modules.AddAsync(tmp2);
-                await _context.SaveChangesAsync();
-                
-
-                cloneModules.Add(new CloneModuleModel
-                {
-                    Id = mod.Id,
-                    Name = mod.Name,
-                    Description = mod.Description,
-                    StartDate = mod.StartDate.AddDays(noOfDays),
-                    EndDate = mod.EndDate.AddDays(noOfDays),
-                    CourseId = CloneFormModel.NewCourseId.Value,
-                    NewModuleid=tmp2.Id
-
-                });
-                foreach(var act in coursedata.Modules.Where(m=> m.Id==mod.Id).Select(m => m.LMSActivities).FirstOrDefault())
-                {
-                    LMSActivity tmpact = new LMSActivity
-                    {
-                        Name = act.Name
-                    ,
-                        Description = act.Description
-                    ,
-                        StartDate = act.StartDate.AddDays(noOfDays)
-                    ,
-                        EndDate = act.EndDate.AddDays(noOfDays)
-                    ,
-                        ActivityTypeId = act.ActivityTypeId
-                    ,
-                        ModuleId = tmp2.Id
-                    };
-                    // add activitities save old and new activitiyid
-                    await _context.LMSActivity.AddAsync(tmpact);
-                    await _context.SaveChangesAsync();
-
-                    cloneActivities.Add(new CloneActivityModel
-                    {
-                        Id=act.Id,
-                        Name=act.Name
- ,
-                        StartDate = act.StartDate.AddDays(noOfDays)
-                  ,
-                        EndDate = act.EndDate.AddDays(noOfDays)
-                        ,
-                        ActivityTypeId = act.ActivityTypeId
-                        ,moduleid = tmp2.Id
-                        ,NewActivityId= tmpact.Id
-
-                    });
-                }
-
-            }
-
-      
-            // get documents
-            List<Document> documents = new List<Document>();
-            documents.AddRange(await _context.Documents.Where(d => d.CourseId.ToString() == CloneFormModel.Id)
-                //.Where(d => (tempteacher.id).Contains(d.LMSUserId))
-                .ToArrayAsync());
-
-          var Modoc=  _context.Documents//.Where(d =>  (tempteacher.id).Contains(d.LMSUserId))
-                .Join(cloneModules,
-                    d => d.ModuleId,
-                   (CloneModuleModel m) => m.Id,
-                    (d, m) => 
-                      new Document
-                      { 
-                          Name = d.Name,
-                          UploadDate = DateTime.Now,
-                          Description = d.Description,
-                          Path = d.Path,
-                          LMSUserId = userid,
-                          CourseId = null,
-                          ModuleId = m.NewModuleid,
-                          LMSActivityId = null,
-                          DocumentTypeId = d.DocumentTypeId
-                      }
-                    
-                );
-            documents.AddRange(Modoc);
-
-            var Actdoc = _context.Documents //.Where(d => (tempteacher.id).Contains(d.LMSUserId))
-               .Join(cloneActivities,
-                   d => d.LMSActivityId,
-                  (CloneActivityModel m) => m.Id,
-                   (d, m) => new Document
-                   {
-                       Name = d.Name,
-                       UploadDate = DateTime.Now,
-                       Description = d.Description,
-                       Path = d.Path,
-                       LMSUserId = userid,
-                       CourseId = null,
-                       ModuleId = null,
-                       LMSActivityId = m.NewActivityId,
-                       DocumentTypeId = d.DocumentTypeId
-                   }
-               );
-            documents.AddRange(Actdoc);
-            // update documents, courseid, moduleid and activitiyid
-            documents.Where(d => d.CourseId != null && d.CourseId.ToString() == CloneFormModel.Id).ToList().ForEach(d => d.CourseId = CloneFormModel.NewCourseId);
-
-            // add documents
-            await _context.Documents.AddRangeAsync(documents.Select(d => new Document
-            {
-                Name = d.Name,
-                UploadDate = DateTime.Now,
-                Description = d.Description,
-                Path = d.Path,
-                LMSUserId =userid,
-                CourseId=d.CourseId,
-                ModuleId=d.ModuleId,
-                LMSActivityId=d.LMSActivityId,
-                DocumentTypeId=d.DocumentTypeId
-              }));
-            await _context.SaveChangesAsync();
-
-
-            // if a img add img.
-            if (CloneFormModel.FileData!= null && CloneFormModel.FileData.Length > 0)
-            {
-                string path = _programrepository.GetCourseImageUploadPath();
-                await _documentrepository.UploadFile(CloneFormModel.FileData, path);
-            }
-
-
-
-
-
-            return Ok(new Course());
         }
         // PUT: api/Courses1
         [HttpPut("{id}")]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<IActionResult> PutCourse(string id, [FromForm] CourseViewModel editModel)
         {
             //if (editModel.criD==null)
@@ -541,7 +232,7 @@ namespace LMS_1_1.Controllers
             if (editModel.FileData.Length>0)
             {
                 string path = _programrepository.GetCourseImageUploadPath();
-                await _documentrepository.UploadFile(editModel.FileData, path);
+                _documentrepository.UploadFile(editModel.FileData, path);
             }
 
             return NoContent();
@@ -549,7 +240,7 @@ namespace LMS_1_1.Controllers
  
         // POST: api/Courses1
         [HttpPost("Create"), DisableRequestSizeLimit]
-        [Authorize(Roles = "Teacher")]
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
         public async Task<ActionResult<Course>> PostCourse([FromForm] CourseViewModel courseVm)
         {
             if (!ModelState.IsValid)
@@ -567,27 +258,42 @@ namespace LMS_1_1.Controllers
            _context.Courses.Add(course);
             await _context.SaveChangesAsync();
           string path=  _programrepository.GetCourseImageUploadPath();
-            await _documentrepository.UploadFile(courseVm.FileData, path);
+            _documentrepository.UploadFile(courseVm.FileData, path);
             return CreatedAtAction("GetCourse", new { id = course.Id }, course);
         }
         // DELETE: api/Courses1/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult<Course>> DeleteCourse(Guid iD)
+        [Authorize(Roles = ConstDefine.R_TEACHER)]
+        public async Task<ActionResult<bool>> DeleteCourse(Guid iD)
         {
-            var course = await _context.Courses.FindAsync(iD);
-            if (course == null)
+            var status= await _programrepository.RemoveCourseHelperAsync(iD);
+            if (status)
             {
-                return NotFound();
+                var course = await _context.Courses.FindAsync(iD);
+                if (course == null)
+                {
+                    return NotFound();
+                }
+                //Delete course. Data related in Modules and LMSActivity also are deleted.
+                _context.Courses.Remove(course);
+
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+
+                    _logger.LogDebug("Error deleting", ex.Message);
+                }
+
+                _logger.LogDebug("!!! Course of {name} deleted.", course.Name);
+
+
+                return Ok(true);      //Send back 200.
             }
-            //Delete course. Data related in Modules and LMSActivity also are deleted.
-            _context.Courses.Remove(course);
-            _context.SaveChanges();
-
-            _logger.LogDebug("!!! Course of {name} deleted.", course.Name);
-
-
-            return Ok(course);      //Send back 200.
+            else
+                return StatusCode(500);
         }
 
         private bool CourseExists(Guid id)

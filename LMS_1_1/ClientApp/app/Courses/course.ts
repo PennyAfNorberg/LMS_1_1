@@ -31,6 +31,7 @@ export interface IModule {
     isExpanded?:string;
     activities?:IActivity2[];
     courseid?: string;
+    color?: string;
 }
 
  export class Module implements IModule
@@ -44,6 +45,7 @@ export interface IModule {
     isExpanded?:string;
     activities?:IActivity2[];
     courseid?: string;
+    color?: string;
 }
 
 
@@ -55,6 +57,7 @@ export interface IActivity {
     description: string;
     moduleid?: string;
     activityTypeId?:number
+    color?: string;
   //  activityType: IActivityType
 }
 
@@ -68,6 +71,7 @@ export class Activity implements IActivity
     moduleid?: string;
 
     activityTypeId?:number 
+    color?: string;
 }
 
 
@@ -81,11 +85,13 @@ export interface IActivity2 {
     isExpanded?:string;
 
     activityType: string
+    color?: string;
 }
 export interface IActivityType
 {
     id: number;
     name: string;
+    color?: string;
 }
 
  export class CloneCourseModel
@@ -97,5 +103,12 @@ export interface IActivityType
     newCourseId?:Guid=null;
     courseImgPath: string="";
  }
+
+  export class CloneType
+  {
+    id:number=0;
+    name:string="";
+
+  }
 //it is also possible to define course class that implement the Icourse interface
 //when needed

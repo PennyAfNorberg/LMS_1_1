@@ -1,6 +1,6 @@
 ﻿import { Injectable, OnDestroy } from '@angular/core';
 
-import { ICourse,course, IModule, IActivity2, IActivity } from './course';
+import { ICourse,course, IModule, IActivity2, IActivity, CloneType } from './course';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject, Subject } from 'rxjs';
 
@@ -17,6 +17,7 @@ import { AuthService } from '../auth/auth.service';
 
 export class CourseService implements  OnDestroy {
 
+
     private courseUrl = "https://localhost:44396/api/courses1";
     private token: string="";
     private unsubscribe : Subject<void> = new Subject();
@@ -25,6 +26,7 @@ export class CourseService implements  OnDestroy {
     
     private getAuthHeader() : HttpHeaders
     {
+        this.AuthService.isAuthenticated;
       return  new HttpHeaders({ "Authorization": "Bearer " + this.token });
     }
 
@@ -93,6 +95,14 @@ export class CourseService implements  OnDestroy {
 
     }
 
+    GetCloneTypes():Observable<CloneType[]> {
+        return this.http.get<CloneType[]>(this.courseUrl +"/CloneTypes",
+        {headers: this.getAuthHeader() 
+}).pipe(
+            tap(data => console.log('All:' + JSON.stringify(data))),
+            catchError(this.handleError)
+        );
+      }
 
     createCourse(course: any) {
 

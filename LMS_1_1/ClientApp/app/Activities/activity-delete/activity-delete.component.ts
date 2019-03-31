@@ -31,6 +31,7 @@ export class ActivityDeleteComponent implements OnInit {
             .subscribe(
                 tactv => {
                     this.act_delete = tactv;
+                    this.messhandler.SendWeek(this.act_delete.startDate);
                     this.cd.markForCheck();
                 },
             error => { console.log(error); });
