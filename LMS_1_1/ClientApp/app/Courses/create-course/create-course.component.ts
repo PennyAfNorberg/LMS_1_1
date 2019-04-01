@@ -43,6 +43,7 @@ export class CreateCourseComponent implements OnInit, OnDestroy  {
             return;
         var mimeType = files[0].type;
         if (mimeType.match(/image\/*/) == null) {
+            this.errorMessage="Image file is needed if you upload an image";
             return;
         }
         var reader = new FileReader();
@@ -65,8 +66,10 @@ export class CreateCourseComponent implements OnInit, OnDestroy  {
      
         let fileToUpload = this.fileInputVariable.nativeElement.files[0];
         let formData = new FormData();
-       /* let MIMEtype = fileToUpload.type.split("/")[0];
-        console.log(MIMEtype);*/
+      let MIMEtype = fileToUpload.type.split("/")[0];
+         /* console.log(MIMEtype);*/
+         if(MIMEtype=="image")
+         {
         formData.append('Name', this.courseForm.value.name);
         formData.append('StartDate', this.courseForm.value.startDate);
         formData.append('Description', this.courseForm.value.description);
@@ -84,6 +87,11 @@ export class CreateCourseComponent implements OnInit, OnDestroy  {
             },
             error => this.errorMessage = <any>error
         );
+    }
+    else
+    {
+      this.errorMessage="Image file is needed if you upload an image";
+    }
     }
    
     ngOnDestroy(): void {

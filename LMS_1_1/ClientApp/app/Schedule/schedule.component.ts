@@ -3,7 +3,7 @@ import { Subject, VirtualTimeScheduler } from 'rxjs';
 import { Router } from '@angular/router';
 import { CourseService } from '../Courses/course.service';
 import { takeUntil } from 'rxjs/operators';
-import { Scheduleentites, weekdays, ScheduleFormModel, CourseSettingsViewModel } from './Scheduleentites';
+import { Scheduleentites, weekdays, ScheduleFormModel, CourseSettingsViewModel, findKmodel } from './Scheduleentites';
 import { Activity,Module } from '../Courses/course';
 import { ScheduleService } from './schedule.service';
 import { isDefaultChangeDetectionStrategy } from '@angular/core/src/change_detection/constants';
@@ -21,10 +21,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
    private courseid:string;
    private scheduleFormModel: ScheduleFormModel= new ScheduleFormModel();
   private _week;
+  private  m:number=0;
+ private n:number=1;
+ private k:number=0;
+ private savek:number=0;
+  maxlength:number=2;
   errorMessage: string;
   actsub: any= null;
   position:string="relative";
   courseSettings: CourseSettingsViewModel[];
+ private size2: number;
   get week()
   {
     return this._week;
@@ -117,7 +123,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     {
       id:4,
      name:"Thursday",
-     acronym:"Tu",
+     acronym:"Th",
     },
     {
       id:5,
@@ -177,31 +183,62 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         (cs:CourseSettingsViewModel[]) =>
         {
           this.courseSettings=cs;
+          this.calculatemaxlength();
           this.mapEntities(entities);
           this.cd.markForCheck();
         }
 
     );
    }
+  calculatemaxlength(): void {
+  
+     let maxlen=0;
+     let actlen=0;
+    let  lastDate:string="";
+    let startTime:Date;
+    let endTime:Date;
+    for(let cs of this.courseSettings)
+    {
+      startTime=new  Date(cs.startTime);
+      endTime=new  Date(cs.endTime);
+      if(cs.startTime.substring(0,10)==lastDate)
+      {
+        actlen+=1+this.datediff(endTime,startTime);
+      }
+      else
+      {
+        actlen=1.65+this.datediff(endTime,startTime);
+        lastDate=cs.startTime.substring(0,10);
+      }
+
+      if(actlen>maxlen)
+      {
+        maxlen=actlen;
+      }
+    }
+    this.maxlength=maxlen;
+  }
 
   mapEntities(entities: Scheduleentites[][]) {
     //Size...
     let size1=entities.length;
     let sizek= this.courseSettings.length;
-    let k=0;
-    let startTime=new  Date(this.courseSettings[k].startTime);
-    let endTime=new  Date(this.courseSettings[k].endTime);
+
+  
+    let startTime=new  Date(this.courseSettings[this.k].startTime);
+    let endTime=new  Date(this.courseSettings[this.k].endTime);
     let startTime2:Date=startTime;
     let laststart=startTime;
     let lastend:Date=startTime;
     for(let i=0; i<size1 ; i++)
     {
-        let size2= entities[i].length;
+      this.size2= entities[i].length;
         let j=0
-        while(j<size2)
+        while(j<this.size2)
       //  for( let j=0; j<size2; j++)
         {
-            if(entities[i][j].length==null)
+          
+          if(entities[i][j].length==null)
             {
 
               
@@ -209,27 +246,27 @@ export class ScheduleComponent implements OnInit, OnDestroy {
               let endt:Date= new  Date(entities[i][j].endTime);
               let startt:Date=new Date(entities[i][j].startTime);
               
-              let ent=entities[i][j];
-            
-              while((endTime < startt)  && (k< sizek) )
-              {
-                k++;
-                startTime2=new  Date(this.courseSettings[k].startTime);
-                if(this.compDay(laststart,startTime2))
-                {
-                  lastend=endTime;
-                }
-                else
-                { // new Day
-                  lastend=startTime2;
-                }
-                
-                startTime=startTime2;
-                endTime=new  Date(this.courseSettings[k].endTime);
-              }
-              laststart=startTime;
-              entities[i][j].offsettime=this.datediff(startTime,lastend);
-             if((startt=>startTime) && (endt<= endTime) )
+              let paramsSet= {i:i,j:j};
+              let parmsK:findKmodel ={startTime:startTime,endTime:endTime,laststart:laststart, lastend:lastend }
+              //find k
+              this.findK(parmsK,startt,sizek );
+             
+              laststart=parmsK.startTime;
+              let ent=entities[paramsSet.i][paramsSet.j];
+              this.setN(entities,ent,paramsSet);
+
+              //set present
+              
+              this.setPresent(entities,parmsK,paramsSet,startt,endt,sizek, size1)
+              i=paramsSet.i;
+              j=paramsSet.j;
+
+           /*  
+              entities[i][j].offsettime=this.datediff(parmsK.startTime,parmsK.lastend);
+              entities[i][j].zindex=this.m;
+              entities[i][j].width=100;
+              entities[i][j].left=0;
+             if((startt=>parmsK.startTime) && (endt<= parmsK.endTime) )
              {
                 entities[i][j].length=this.datediff(endt,startt);
                 j++;
@@ -237,26 +274,29 @@ export class ScheduleComponent implements OnInit, OnDestroy {
              else
               {
                 entities[i][j].length=this.datediff(endTime,startTime);
-                k++;
+
+                //loop next
+                let ent=entities[i][j];
+                this.k++;
                     lastend=endTime;
                     laststart=startTime;
-                    startTime=new  Date(this.courseSettings[k].startTime);
-                    endTime=new  Date(this.courseSettings[k].endTime);
+                    startTime=new  Date(this.courseSettings[this.k].startTime);
+                    endTime=new  Date(this.courseSettings[this.k].endTime);
                     
                     j++;
-                while((endTime<= endt) && (i< size1) && (k<sizek))
+                while((endTime<= endt) && (i< size1) && (this.k<sizek))
                 {
-                   
+                   // next slot
                    if(!this.compDay(laststart,startTime)) 
                    {
                       i++;
                       j=0;
                       lastend=startTime;
                       laststart=startTime;
-                      size2= entities[i].length;
+                      this.size2= entities[i].length;
                     }
                     if(i< size1)
-                    {
+                    { // måste placera rätt här.
                       entities[i].splice(j,0,{
                           weekday:"",
                           id:"",
@@ -266,18 +306,21 @@ export class ScheduleComponent implements OnInit, OnDestroy {
                           name:ent.name,
                           description:ent.description,
                           startTime:ent.startTime,
-                          endTime:ent.endTime
+                          endTime:ent.endTime,
+                          zindex:this.m,
+                          width:100,
+                          left:0
                           });
-                          size2++;
+                          this.size2++;
                     }
                     j++; 
-                    k++;
-                    if(k==sizek)
+                    this.k++;
+                    if(this.k==sizek)
                         break;
                     else
                     {  
                      
-                      startTime2=new  Date(this.courseSettings[k].startTime);
+                      startTime2=new  Date(this.courseSettings[this.k].startTime);
                       if(this.compDay(laststart,startTime2))
                       {
                         lastend=endTime;
@@ -288,17 +331,174 @@ export class ScheduleComponent implements OnInit, OnDestroy {
                       }
                       laststart=startTime;
                       startTime=startTime2;
-                      endTime=new  Date(this.courseSettings[k].endTime);
+                      endTime=new  Date(this.courseSettings[this.k].endTime);
                       
                     }  
                 }
               }
-
+*/
             }
         }
     }
     this.entities=entities;
   }
+
+  private findK(parmsK: findKmodel, startt :Date, sizek:number): any {
+    while((parmsK.endTime < startt)  && (this.k< sizek) )
+    {
+      this.k++;
+      let startTime2=new  Date(this.courseSettings[this.k].startTime);
+      if(this.compDay(parmsK.laststart,startTime2))
+      {
+        parmsK.lastend=parmsK.endTime;
+      }
+      else
+      { // new Day
+        parmsK.lastend=startTime2;
+      }
+      
+      parmsK.startTime=startTime2;
+      parmsK.endTime=new  Date(this.courseSettings[this.k].endTime);
+    }
+  } 
+
+   private checkpred(s1:Date,s2:Date,e1:Date, e2:Date )
+   {
+     return (s1<= e2) && (e1 >=s2);
+   }
+   private setN(entities: Scheduleentites[][],ent:Scheduleentites,paramsSet: {i:number,j:number})
+   {
+      
+      // only call if not set so no check if cell is worked.
+      if(this.courseSettings[this.k].n==-1)
+      {
+        let startTime=new  Date(ent.startTime);
+        let endTime=new  Date(ent.endTime);
+        let csStartTime=new Date(this.courseSettings[this.k].startTime);
+        let csEndTime =new Date(this.courseSettings[this.k].endTime);
+        startTime=(startTime<csStartTime)?csStartTime:startTime;
+        endTime=(endTime>csEndTime)?csEndTime:endTime;
+        //let tmpent=entities[paramsSet.i];
+       // let test=[];
+         let i=0;
+
+           for(let cs of entities[paramsSet.i])
+           {
+              if(this.checkpred(new Date(cs.startTime), startTime,new Date(cs.endTime), endTime ))
+              {
+              //  test[i]=cs;
+                i++;
+              }
+            }
+         
+/*
+        let test=tmpent.filter( (cs) =>
+        {
+          this.checkpred(new Date(cs.startTime), startTime,new Date(cs.endTime), endTime );
+            //(new Date(cs.startTime) <= endTime) && (new Date(cs.endTime) >= startTime)
+        });
+        */
+        this.courseSettings[this.k].n=i;
+      }
+      if(this.courseSettings[this.k].n != -1)
+      {
+         this.n=this.courseSettings[this.k].n ;
+      }
+      else
+      {
+        this.n=1;              
+      }
+      this.m=this.courseSettings[this.k].m;
+   }
+
+ private setPresent(entities: Scheduleentites[][], parmsK: findKmodel, paramsSet: { i: number; j: number; }, startt: Date, endt: Date,sizek :number,size1:number): any {
+    entities[paramsSet.i][paramsSet.j].offsettime=this.datediff(parmsK.startTime,parmsK.lastend);
+    entities[paramsSet.i][paramsSet.j].zindex=this.m;
+    entities[paramsSet.i][paramsSet.j].width=100*(this.n-this.m)/this.n;
+    entities[paramsSet.i][paramsSet.j].left=100*this.m/this.n;
+    this.courseSettings[this.k].m++;
+   if((startt=>parmsK.startTime) && (endt<= parmsK.endTime) )
+   {
+      entities[paramsSet.i][paramsSet.j].length=this.datediff(endt,startt);
+      paramsSet.j++;
+   }
+   else
+    {
+      entities[paramsSet.i][paramsSet.j].length=this.datediff(parmsK.endTime,parmsK.startTime);
+
+      this.loopNext(entities,parmsK,paramsSet,startt,endt,sizek,size1 );
+
+      //loop next
+    }
+  }
+
+
+ private loopNext(entities: Scheduleentites[][], parmsK: findKmodel, paramsSet: { i: number; j: number; }, startt: Date, endt: Date,sizek :number, size1:number): any {
+    let ent=entities[paramsSet.i][paramsSet.j];
+    this.k++;
+    parmsK.lastend=parmsK.endTime;
+    parmsK.laststart=parmsK.startTime;
+    parmsK.startTime=new  Date(this.courseSettings[this.k].startTime);
+    parmsK.endTime=new  Date(this.courseSettings[this.k].endTime);
+       
+    paramsSet.j++;
+    while((parmsK.endTime<= endt) && (paramsSet.i< size1) && (this.k<sizek))
+    {
+       // next slot
+       if(!this.compDay(parmsK.laststart,parmsK.startTime)) 
+       {
+          paramsSet.i++;
+          paramsSet.j=0;
+          parmsK.lastend=parmsK.startTime;
+          parmsK.laststart=parmsK.startTime;
+          this.size2= entities[paramsSet.i].length;
+        }
+        if(paramsSet.i< size1)
+        { // måste placera rätt här.
+          this.setN(entities,ent,paramsSet ); 
+          entities[paramsSet.i].splice(paramsSet.j,0,{
+              weekday:"",
+              id:"",
+              color:ent.color,
+              length:(parmsK.endTime>endt)?this.datediff(endt,parmsK.startTime):this.datediff(parmsK.endTime,parmsK.startTime),
+              offsettime:this.datediff(parmsK.startTime,parmsK.lastend),
+              name:ent.name,
+              description:ent.description,
+              startTime:(parmsK.startTime>startt)?this.courseSettings[this.k].endTime:ent.startTime,
+              endTime:(parmsK.endTime<endt)?this.courseSettings[this.k].endTime:ent.endTime,
+              zindex:this.m,
+              width:100*(this.n-this.m)/this.n,
+              left:100*this.m/this.n
+              });
+              this.size2++;
+              this.courseSettings[this.k].m++;
+        }
+        paramsSet.j++; 
+        this.k++;
+        if(this.k==sizek)
+            break;
+        else
+        {  
+          this.setN(entities,ent,paramsSet);
+          let startTime2=new  Date(this.courseSettings[this.k].startTime);
+          if(this.compDay(parmsK.laststart,startTime2))
+          {
+            parmsK.lastend=parmsK.endTime;
+          }
+          else
+          { // new Day
+            parmsK.lastend=startTime2;
+          }
+          parmsK.laststart=parmsK.startTime;
+          parmsK.startTime=startTime2;
+          parmsK.endTime=new  Date(this.courseSettings[this.k].endTime);
+          
+        }  
+    }
+  }
+
+
+
   minstart(arg0: CourseSettingsViewModel[]): any {
     throw new Error("Method not implemented.");
   }

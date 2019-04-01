@@ -81,6 +81,8 @@ export class CloneComponent implements OnInit, OnDestroy {
         return;
     var mimeType = files[0].type;
     if (mimeType.match(/image\/*/) == null) {
+      this.errorMessage="Image file is needed if you upload an image";
+      
         return;
     }
     this.errorMessage="";

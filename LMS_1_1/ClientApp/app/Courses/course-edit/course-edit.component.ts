@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 export class CourseEditComponent implements OnInit, OnDestroy {
     private unsubscribe : Subject<void> = new Subject();
     editCourse: ICourse=new course();
-    errorMsg: string;
+    errorMessage: string;
     @ViewChild("fileInput") fileInputVariable: any;
     isTeacher: boolean;
     selectFilename: string;
@@ -41,7 +41,7 @@ export class CourseEditComponent implements OnInit, OnDestroy {
                 this.editCourse = tcourse;
                 this.editCourse.courseImgPath = tmppath;
             },
-            error => { this.errorMsg = <any>error; });
+            error => { this.errorMessage = <any>error; });
      //   console.log("XXXXXXXXXXXXXX=>" + this.editCourse.courseImgPath);
     } 
 
@@ -52,6 +52,7 @@ export class CourseEditComponent implements OnInit, OnDestroy {
             return;
         var mimeType = files[0].type;
         if (mimeType.match(/image\/*/) == null) {
+            this.errorMessage="Image file is needed if you upload an image";
             return;
         }
         var reader = new FileReader();
@@ -72,6 +73,9 @@ export class CourseEditComponent implements OnInit, OnDestroy {
        // console.log("XXXXXXXXXXXXX====>" + this.selectFilename);
 
         let formData = new FormData();
+        let MIMEtype = fileToUpload.type.split("/")[0];    
+        if(MIMEtype=="image")
+        {
         formData.append('criD', this.editCourse.id.toString());
         formData.append('Name', this.editCourse.name);
         formData.append('StartDate', this.editCourse.startDate.toString());
@@ -88,7 +92,12 @@ export class CourseEditComponent implements OnInit, OnDestroy {
             }
 
 
-        );
+        );     
+     }
+        else
+        {
+          this.errorMessage="Image file is needed if you upload an image";
+        }
         
     }
     ngOnDestroy(): void {

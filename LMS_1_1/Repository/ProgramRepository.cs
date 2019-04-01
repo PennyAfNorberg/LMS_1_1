@@ -53,7 +53,7 @@ namespace LMS_1_1.Repository
             */
 
         }
-        #region Commen
+        #region Common
         public async Task AddEntityAsync(object model)
         {
             if (model is IProgram || model is ActivityType)
@@ -432,18 +432,21 @@ namespace LMS_1_1.Repository
             }
             foreach (var DateCheck in DateToCheck)
             {
-                svar.AddRange( _ctx.CourseSettings
-                    .Where(cs => (cs.CourseId.ToString() ?? courseId) == courseId && (cs.Date ?? DateCheck).ToString().Substring(0,10) == DateCheck.ToString().Substring(0, 10))
-                    .Select( cs => new CourseSettingsViewModel
+                svar.AddRange(_ctx.CourseSettings
+                    .Where(cs => (cs.CourseId.ToString() ?? courseId) == courseId && (cs.Date ?? DateCheck).ToString().Substring(0, 10) == DateCheck.ToString().Substring(0, 10))
+                    .Select(cs => new CourseSettingsViewModel
                     {
-                        Id=cs.Id,
-                        CourseId=cs.CourseId,
-                        Date=cs.Date,
-                        StartTime= DateCheck.ToString("yyyy-MM-dd") +" "+ cs.StartTime, 
-                       // StartLunch=cs.StartLunch,
-                       // EndLunch=cs.EndLunch,
-                        EndTime= DateCheck.ToString("yyyy-MM-dd") + " "  + cs.EndTime,
-                        ForDate=DateCheck
+                        Id = cs.Id,
+                        CourseId = cs.CourseId,
+                        Date = cs.Date,
+                        StartTime = DateCheck.ToString("yyyy-MM-dd") + " " + cs.StartTime,
+                        // StartLunch=cs.StartLunch,
+                        // EndLunch=cs.EndLunch,
+                        EndTime = DateCheck.ToString("yyyy-MM-dd") + " " + cs.EndTime,
+                        ForDate = DateCheck,
+                        N = -1,
+                        M = 0
+                        
                     })
                     );
             }
@@ -606,7 +609,7 @@ namespace LMS_1_1.Repository
                      StartTime = (DateTime.Parse(minCsstart) > m.StartTime) ? DateTime.Parse(minCsstart) : m.StartTime,
                      EndTime = (DateTime.Parse(maxCsend) < m.EndTime) ? DateTime.Parse(maxCsend) : m.EndTime,
                      Description = m.Description,
-                     DayOfWeek = DateTime.Parse(minCsstart).DayOfWeek
+                     DayOfWeek = (DateTime.Parse(minCsstart) > m.StartTime)? DateTime.Parse(minCsstart).DayOfWeek : m.StartTime.DayOfWeek
                  }).ToList();
 
 
@@ -618,7 +621,7 @@ namespace LMS_1_1.Repository
                 res[i] = new List<ScheduleViewModel>();
             }
 
-        foreach (var work in workthis)
+        foreach (var work in workthis.OrderBy(m=> m.StartTime).ThenByDescending(m=> (m.EndTime-m.StartTime)))
                 {
                     if (work.Color != null || defaultcolor == null)
                         res[(int)work.DayOfWeek].Add(work);
@@ -898,7 +901,7 @@ namespace LMS_1_1.Repository
             }
             try
             {
-                foreach (var work in workthis)
+                foreach (var work in workthis.OrderBy(m => m.StartTime).ThenByDescending(m => (m.EndTime - m.StartTime)))
                 {
                     if (work.Color != null || defaultcolor== null)
                         res[(int)work.DayOfWeek].Add(work);
