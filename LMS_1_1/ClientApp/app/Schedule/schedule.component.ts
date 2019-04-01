@@ -223,13 +223,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     //Size...
     let size1=entities.length;
     let sizek= this.courseSettings.length;
-
+    this.k=0;
   
-    let startTime=new  Date(this.courseSettings[this.k].startTime);
-    let endTime=new  Date(this.courseSettings[this.k].endTime);
+    let startTime=new  Date(this.courseSettings[0].startTime);
+    let endTime=new  Date(this.courseSettings[0].endTime);
     let startTime2:Date=startTime;
     let laststart=startTime;
     let lastend:Date=startTime;
+    let parmsK:findKmodel ={startTime:startTime,endTime:endTime,laststart:laststart, lastend:lastend }
     for(let i=0; i<size1 ; i++)
     {
       this.size2= entities[i].length;
@@ -247,7 +248,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
               let startt:Date=new Date(entities[i][j].startTime);
               
               let paramsSet= {i:i,j:j};
-              let parmsK:findKmodel ={startTime:startTime,endTime:endTime,laststart:laststart, lastend:lastend }
+              
               //find k
               this.findK(parmsK,startt,sizek );
              
@@ -348,7 +349,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     {
       this.k++;
       let startTime2=new  Date(this.courseSettings[this.k].startTime);
-      if(this.compDay(parmsK.laststart,startTime2))
+      if(this.compDay(parmsK.lastend,startTime2))
       {
         parmsK.lastend=parmsK.endTime;
       }
@@ -356,7 +357,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       { // new Day
         parmsK.lastend=startTime2;
       }
-      
+    //  parmsK.laststart=parmsK.startTime;
       parmsK.startTime=startTime2;
       parmsK.endTime=new  Date(this.courseSettings[this.k].endTime);
     }
@@ -381,8 +382,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         //let tmpent=entities[paramsSet.i];
        // let test=[];
          let i=0;
-
-           for(let cs of entities[paramsSet.i])
+for(let row of entities)
+{
+           for(let cs of row)
            {
               if(this.checkpred(new Date(cs.startTime), startTime,new Date(cs.endTime), endTime ))
               {
@@ -390,7 +392,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
                 i++;
               }
             }
-         
+          } 
 /*
         let test=tmpent.filter( (cs) =>
         {
