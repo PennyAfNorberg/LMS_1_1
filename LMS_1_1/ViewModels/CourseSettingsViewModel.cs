@@ -20,5 +20,8 @@ namespace LMS_1_1.ViewModels
         public string EndTime { get; set; }
 
         public DateTime ForDate { get; set; }
+        public int? N { get; set; }
+
+        public int? M { get; set; }
     }
 }

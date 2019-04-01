@@ -2,6 +2,7 @@
 
 <h4>Course</h4>
 <hr />
+<div *ngIf="errorMessage" class="alert alert-warning">{{errorMessage}}</div>
 <div class="row">
     <div class="col-md-4">
         <form #mycourse="ngForm" (ngSubmit)="UpdateCourse()">

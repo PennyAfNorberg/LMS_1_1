@@ -12,13 +12,18 @@
   </div>
     <div *ngIf="entities" class="row">
     <div class="offset-1"></div>
-  <div class="col-2 border border-dark nopad" *ngFor="let weekday of weekdays"> 
-    <span style="font-size:1vw;" [title]="weekday.name">{{weekday.acronym}}</span>
+  <div class="col-2 border border-dark nopad" *ngFor="let weekday of weekdays"
+  [style.height.em]="maxlength"
+  > 
+    <span  [title]="weekday.name">{{weekday.acronym}}</span>
     <div *ngFor="let entity of entities[weekday.id]"
         [style.background-color]="entity.color"
         [style.height.em]="entity.length"
+        [style.z-index]="entity.zindex"
+        [style.width.%]="entity.width"
+        [style.left.%]="entity.left"
         [style.top.em]="entity.offsettime"
-        style="position:relative; font-size:1vw;"
+        style="position:relative;"
    
         
         [title]="entity.description"

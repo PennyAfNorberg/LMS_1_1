@@ -23,6 +23,10 @@ namespace LMS_1_1.ViewModels
         public DayOfWeek? DayOfWeek { get; set; }
 
         public int? ActivityTypeId { get; set; }
+
+        public int? Zindex { get; set; }
+        public int? Width { get; set; }
+        public int? Left { get; set; }
     }
 
     /*
