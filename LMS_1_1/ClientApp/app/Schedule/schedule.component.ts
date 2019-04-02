@@ -224,13 +224,54 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
  private AddEntity(newEntity: Scheduleentites):void {
   //  throw new Error("Method not implemented.");
+
+  // get this.entities, ad this one, set calc props to null for all affekted, the same day? a and the runt map?
+   let entities=this.entities;
+   let est:Date,eend:Date;
+   let nst:Date,nend:Date;
+   nst=new Date(newEntity.startTime);
+   nend=new Date(newEntity.endTime);
+
+    for(let rowid=0; rowid< entities.length;rowid++)
+    {
+        for(let entid=0; entid <entities[rowid].length; entid++)
+        {
+            est=new Date(entities[rowid][entid].startTime);
+            eend=new Date(entities[rowid][entid].endTime);
+            if((nend>=est) && (eend<=nst) ) // fast hela dagarna?
+            {
+              entities[rowid][entid].length=null;
+              entities[rowid][entid].offsettime=null;
+              entities[rowid][entid].zindex=null;
+              entities[rowid][entid].width=null;
+              entities[rowid][entid].left=null;
+              if(entid==0)
+              { // strange?
+                  // if nst >= fram  but <=ost and lst>olst  nst => 0, skift the rest
+                  // else do nothing
+              }
+              else
+              {
+                // if lst<=nst<=rst and ll<=nl<=rll then nst between l och r, skift the rest 
+                // else if no r, add nst last, no skift.
+              }
+
+            }
+
+        }
+
+       
+    }
+    this.mapEntities( entities);
   }
+
+
 
   private UpdateColor(newColor: ScheduleColors): void {
 
-      for (let rowid in this.entities)
-      {
-        for(let entid in this.entities[rowid])
+    for(let rowid=0; rowid< this.entities.length;rowid++)
+    {
+        for(let entid=0; entid <this.entities[rowid].length; entid++)
         {
   
             if(((newColor.id != null) && (newColor.id===this.entities[rowid][entid].id)) || 
@@ -299,7 +340,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.maxlength=maxlen;
   }
 
-  mapEntities(entities: Scheduleentites[][]) {
+ private mapEntities(entities: Scheduleentites[][]) {
     //Size...
     let size1=entities.length;
     let sizek= this.courseSettings.length;
@@ -497,13 +538,17 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
 
           let offsettime=0;
+          offsettime+=this.datediff(parmsK.startTime,parmsK.lastend);
           if(this.m==0)
           {
-            offsettime+=this.datediff(parmsK.startTime,parmsK.lastend);
+              if((this.courseSettings[this.k-1].m >0) && ( paramsSet.j>0))
+              {
+                offsettime+=entities[paramsSet.i][paramsSet.j-1].offsettime;
+              }
           }
           if(this.m>0)
           {
-            offsettime-=this.datediff(parmsK.startTime,parmsK.lastend);
+           
             if(paramsSet.j>0)
               offsettime+=entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
           }
