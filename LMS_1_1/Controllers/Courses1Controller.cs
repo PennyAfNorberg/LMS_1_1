@@ -104,7 +104,7 @@ namespace LMS_1_1.Controllers
         {
                Guid idG = Guid.Parse(id);
 
-            var course = await _programrepository.GetCourseAndModule(idG);
+            var course = await _programrepository.GetCourseAndModuleAsync(idG);
 
             if (course == null)
             {
@@ -118,7 +118,7 @@ namespace LMS_1_1.Controllers
         public async Task<ActionResult<ICollection<ActivityViewModel>>> GetActivitiesFromModulid(string id)
         {
             Guid idG = Guid.Parse(id);
-            var res = await _programrepository.GetActivitiesFromModulid(idG);
+            var res = await _programrepository.GetActivitiesFromModulidAsync(idG);
 
 
             if (res == null)
@@ -134,7 +134,7 @@ namespace LMS_1_1.Controllers
         public async Task<ActionResult<ModelAllViewModel>> GetModulesAndActivitiesFromModulid(string id)
         {
               Guid idG = Guid.Parse(id);
-            var Module1 = await _programrepository.GetModulesAndActivitiesFromModulid(idG);
+            var Module1 = await _programrepository.GetModulesAndActivitiesFromModulidAsync(idG);
             
 
             if (Module1 == null)
@@ -151,10 +151,10 @@ namespace LMS_1_1.Controllers
         }
 
         [HttpPost("ModulesWithColor")]
-        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetModulesWithColour([FromBody] ScheduleFormModel scheduleFormModel)
+        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetModulesWithColourAsync([FromBody] ScheduleFormModel scheduleFormModel)
         {
             string userid = (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
-            var Entities = await _programrepository.GetModulesWithColour(scheduleFormModel, userid);
+            var Entities = await _programrepository.GetModulesWithColourAsync(scheduleFormModel, userid);
             if (Entities == null)
             {
                 return NotFound();
@@ -163,10 +163,10 @@ namespace LMS_1_1.Controllers
             return Ok(Entities);
         }
         [HttpPost("ActivitiesWithColor")]
-        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetActivitiesWithColour([FromBody] ScheduleFormModel scheduleFormModel)
+        public async Task<ActionResult<List<ScheduleViewModel>[]>> GetActivitiesWithColourAsync([FromBody] ScheduleFormModel scheduleFormModel)
         {
             string userid = (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
-            var Entities = await _programrepository.GetActivitiesWithColour(scheduleFormModel, userid);
+            var Entities = await _programrepository.GetActivitiesWithColourAsync(scheduleFormModel, userid);
             if (Entities == null)
             {
                 return NotFound();

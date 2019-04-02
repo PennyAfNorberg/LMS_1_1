@@ -12,16 +12,16 @@ namespace LMS_1_1.Repository
 
         IQueryable<CourseUser> GetCoursesForUsers(string LMSUserId);
 
-        Task AddCourseUser(string CouresID, string LMSUserid);
+        Task AddCourseUserAsync(string CouresID, string LMSUserid);
 
-        Task RemoveCourseUser(Guid CouresID, string LMSUserid);
+        Task RemoveCourseUserAsync(Guid CouresID, string LMSUserid);
        
-        Task RemoveAllCourseUsersForCourse(string CouresID);
-        Task RemoveAllCourseUsersForUser(string UserID);
+        Task RemoveAllCourseUsersForCourseAsync(string CouresID);
+        Task RemoveAllCourseUsersForUserAsync(string UserID);
 
-        Task<ICollection<LMSUser>> GetUsers(string courseId, bool choosed);
-        Task<string> GetCourseName(string CourseId);
-        Task<bool> SaveChanges();
+        Task<ICollection<LMSUser>> GetUsersAsync(string courseId, bool choosed);
+        Task<string> GetCourseNameAsync(string CourseId);
+        Task<bool> SaveChangesAsync();
         Task<ICollection<Course>> GetCoursesOffAsync(string UserId);
         Task<ICollection<Course>> GetCoursesOnAsync(string UserId);
     }

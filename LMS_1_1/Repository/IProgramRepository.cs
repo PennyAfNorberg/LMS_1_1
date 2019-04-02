@@ -14,7 +14,7 @@ namespace LMS_1_1.Repository
         Task<IEnumerable<Course>> GetAllCoursesAsync (bool includeModule);
         Task<Course> GetCourseByIdAsync (Guid courseId);
         Task<CourseAllViewModel> GetCourseByIdAllAsync(Guid courseId);
-        Task<CourseAllViewModel> GetCourseAndModule(Guid courseId);
+        Task<CourseAllViewModel> GetCourseAndModuleAsync(Guid courseId);
 
         Task<bool> CourseExistsAsync (Guid id);
         /* Course FindCourseById (string courseId);*/
@@ -23,37 +23,37 @@ namespace LMS_1_1.Repository
         Task<IEnumerable<Module>> GetAllModulesAsync (bool includeActivities);
         Task<Module> GetModuleByIdAsync (Guid moduleId, bool includeActivity);
 
-        Task<ModelAllViewModel> GetModulesAndActivitiesFromModulid(Guid moduleId);
+        Task<ModelAllViewModel> GetModulesAndActivitiesFromModulidAsync(Guid moduleId);
         Task<bool> ModuleExistsAsync (Guid id);
         Task<IEnumerable<Course>> GetCoursesForUserAsync(string userid);
 
 
         Task<IEnumerable<LMSActivity>> GetAllActivitiesAsync ();
         Task<LMSActivity> GetActivityByIdAsync (Guid activityId);
-        Task<ICollection<ActivityViewModel>> GetActivitiesFromModulid(Guid moduleId);
+        Task<ICollection<ActivityViewModel>> GetActivitiesFromModulidAsync(Guid moduleId);
         Task<bool> LMSActivityExistsAsync (Guid id);
-        Task<bool> MoveLMSActivity(ActivityFormModel modelVm);
+        Task<bool> MoveLMSActivityAsync(ActivityFormModel modelVm);
 
         Task<IEnumerable<ActivityType>> GetAllActivityTypesAsync ();
         Task<ActivityType> GetAllActivityTypesByIdAsync (int activityTypeId);
         Task<bool> ActivityTypeExistsAsync (int id);
         
-        Task AddTokenUser(string token, string userid);
-        Task<bool> RemoveTokenUser(string token);
-        Task<bool> IsTeacher(string token);
+        Task AddTokenUserAsync(string token, string userid);
+        Task<bool> RemoveTokenUserAsync(string token);
+        Task<bool> IsTeacherAsync(string token);
         Task<bool> RemoveCourseHelperAsync(Guid courseid);
         Task<bool> RemoveModuleHelperAsync(Guid moduleid);
         Task<bool> RemoveActivityHelperAsync(Guid activityid);
-        Task<bool> MoveModule(ModuleViewModel modelVm);
-        Task<bool> CheckIfModuleInRange(string courseid, DateTime start, DateTime end);
-        Task<bool> CheckIfActivityInRange(string modulid, DateTime start, DateTime end);
+        Task<bool> MoveModuleAsync(ModuleViewModel modelVm);
+        Task<bool> CheckIfModuleInRangeAsync(string courseid, DateTime start, DateTime end);
+        Task<bool> CheckIfActivityInRangeAsync(string modulid, DateTime start, DateTime end);
         Task<bool> SaveAllAsync ();
         Task AddEntityAsync (object model);
         void UpdateEntity (object model);
         void RemoveEntity (object model);
         Task<Course> CloneCourseAsync(CloneFormModel cloneFormModel, string userid);
-        Task<List<ScheduleViewModel>[]> GetModulesWithColour(ScheduleFormModel scheduleFormModel,string userid);
-        Task<List<ScheduleViewModel>[]> GetActivitiesWithColour(ScheduleFormModel scheduleFormModel, string userid);
-        Task<List<CourseSettingsViewModel>> GetCourseSettingsAsync(string courseId, DateTime? startDate, DateTime? endDate);
+        Task<List<ScheduleViewModel>[]> GetModulesWithColourAsync(ScheduleFormModel scheduleFormModel,string userid);
+        Task<List<ScheduleViewModel>[]> GetActivitiesWithColourAsync(ScheduleFormModel scheduleFormModel, string userid);
+        List<CourseSettingsViewModel> GetCourseSettings(string courseId, DateTime? startDate, DateTime? endDate);
     }
 }

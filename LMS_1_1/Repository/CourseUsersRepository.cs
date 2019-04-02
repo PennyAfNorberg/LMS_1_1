@@ -45,7 +45,7 @@ namespace LMS_1_1.Repository
                  .Where(cu => cu.LMSUserId == LMSUserId);
         }
 
-        public async Task<string> GetCourseName(string CourseId)
+        public async Task<string> GetCourseNameAsync(string CourseId)
         {
            var res= await  _context
                    .Courses.FirstOrDefaultAsync(c => c.Id.ToString() == CourseId);
@@ -54,7 +54,7 @@ namespace LMS_1_1.Repository
 
         }
 
-        public async Task AddCourseUser(string CourseID, string LMSUserid)
+        public async Task AddCourseUserAsync(string CourseID, string LMSUserid)
         {
             var temp = new CourseUser{ LMSUserId = LMSUserid };
             temp.Course = await _context.Courses.FirstOrDefaultAsync(c => c.Id.ToString() == CourseID);
@@ -64,17 +64,17 @@ namespace LMS_1_1.Repository
            // await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> SaveChanges()
+        public async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;  
         }
-        public async Task RemoveCourseUser(Guid CouresID, string LMSUserid)
+        public async Task RemoveCourseUserAsync(Guid CouresID, string LMSUserid)
         {
             _context.Remove(new CourseUser { CourseId = CouresID, LMSUserId = LMSUserid });
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveAllCourseUsersForCourse(string CouresID)
+        public async Task RemoveAllCourseUsersForCourseAsync(string CouresID)
         {
               var temp = _context.CourseUsers.Where(cu => cu.CourseId.ToString() == CouresID);
 
@@ -89,7 +89,7 @@ namespace LMS_1_1.Repository
         }
 
 
-        public async Task RemoveAllCourseUsersForUser(string UserID)
+        public async Task RemoveAllCourseUsersForUserAsync(string UserID)
         {
             var temp = _context.CourseUsers.Where(cu => cu.LMSUserId.ToString() == UserID);
 
@@ -103,7 +103,7 @@ namespace LMS_1_1.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<LMSUser>> GetUsers(string courseId, bool choosed)
+        public async Task<ICollection<LMSUser>> GetUsersAsync(string courseId, bool choosed)
         {
   
                 var res = await _context.CourseUsers

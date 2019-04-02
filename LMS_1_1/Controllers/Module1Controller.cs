@@ -143,7 +143,7 @@ namespace LMS_1_1.Controllers
             }
 
             //  Guid Crid = new Guid(activtyVm.id);
-            await _programrepository.MoveModule(modelVm);
+            await _programrepository.MoveModuleAsync(modelVm);
             Module module = new Module
             {
                 Id = Guid.Parse(modelVm.Id),
@@ -216,13 +216,13 @@ namespace LMS_1_1.Controllers
             bool res = false;
             if (parmas.Dubbtype == "Module")
             {
-                res = await _programrepository.CheckIfModuleInRange(parmas.Dubbid, parmas.Dubbstart, parmas.Dubbend);
+                res = await _programrepository.CheckIfModuleInRangeAsync(parmas.Dubbid, parmas.Dubbstart, parmas.Dubbend);
 
 
             }
             else if (parmas.Dubbtype == "Activity")
             {
-                res = await _programrepository.CheckIfActivityInRange(parmas.Dubbid, parmas.Dubbstart, parmas.Dubbend);
+                res = await _programrepository.CheckIfActivityInRangeAsync(parmas.Dubbid, parmas.Dubbstart, parmas.Dubbend);
             }
             else
             {

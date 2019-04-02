@@ -138,7 +138,7 @@ namespace LMS_1_1.Controllers
                             ,
                             isTeacher = token.Claims.Where(c => c.Type == "Teacher").Select(c => c.Value)
                         };
-                        await _programRepository.AddTokenUser(results.token, user.Id);
+                        await _programRepository.AddTokenUserAsync(results.token, user.Id);
 
                         return Created("", results);
                     }
@@ -154,7 +154,7 @@ namespace LMS_1_1.Controllers
         [HttpPost]
         public async Task<bool> IsTeacher(string token)
         {
-            return await _programRepository.IsTeacher(token);
+            return await _programRepository.IsTeacherAsync(token);
 
         }
     }

@@ -381,7 +381,7 @@ namespace LMS_1_1.Controllers
         [HttpPost]
         public async Task<bool> IsTeacher(string token)
         {
-            return await _programRepository.IsTeacher(token);
+            return await _programRepository.IsTeacherAsync(token);
 
         }
     }

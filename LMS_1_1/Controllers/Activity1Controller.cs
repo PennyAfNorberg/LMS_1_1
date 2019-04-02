@@ -153,7 +153,7 @@ namespace LMS_1_1.Controllers
             }
 
             //  Guid Crid = new Guid(activtyVm.id);
-            var status= await _programrepository.MoveLMSActivity(activtyVm);
+            var status= await _programrepository.MoveLMSActivityAsync(activtyVm);
 
             if(status)
             {

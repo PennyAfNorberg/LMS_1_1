@@ -42,7 +42,7 @@ namespace LMS_1_1.Controllers
         [HttpPost]
         public async Task<ActionResult<ICollection<CourseUserViewModel>>> GetusersOn([FromBody] CourseIdViewModel CourseId)
         {
-            var res = (await _repository.GetUsers(CourseId.CourseId, true))
+            var res = (await _repository.GetUsersAsync(CourseId.CourseId, true))
                 .Select(cu => new CourseUserViewModel { Userid = cu.Id, FirstName = cu.FirstName, LastName = cu.LastName }).ToList();
 
           
@@ -55,7 +55,7 @@ namespace LMS_1_1.Controllers
         public async Task<ActionResult<string>> GetCourseName([FromBody] CourseIdViewModel CourseId)
         {
             var res = Json(new {
-                            Name = (await _repository.GetCourseName(CourseId.CourseId))
+                            Name = (await _repository.GetCourseNameAsync(CourseId.CourseId))
                     });
             return Ok(res);
 
@@ -66,7 +66,7 @@ namespace LMS_1_1.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<ActionResult<ICollection<CourseUserViewModel>>> GetusersOff([FromBody] CourseIdViewModel CourseId)
         {
-            var res = (await _repository.GetUsers(CourseId.CourseId, false))
+            var res = (await _repository.GetUsersAsync(CourseId.CourseId, false))
                 .Select(cu => new CourseUserViewModel { Userid = cu.Id, FirstName = cu.FirstName, LastName = cu.LastName }).ToList();
             return Ok(res);
 
@@ -284,14 +284,14 @@ namespace LMS_1_1.Controllers
             //  var user = await _userManager.FindByNameAsync(User.Identity.Name);
             try
             {
-                await _repository.RemoveAllCourseUsersForUser(savecouseListViewmodel.UserId);
+                await _repository.RemoveAllCourseUsersForUserAsync(savecouseListViewmodel.UserId);
 
                 foreach (var courseid in savecouseListViewmodel.CourseIds)
                 {
-                    await _repository.AddCourseUser( courseid, savecouseListViewmodel.UserId);
+                    await _repository.AddCourseUserAsync( courseid, savecouseListViewmodel.UserId);
                 }
 
-                await _repository.SaveChanges();
+                await _repository.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -381,14 +381,14 @@ namespace LMS_1_1.Controllers
             // and SavecouseListViewmodel.Userids is list of courseids
             try
             {
-                await _repository.RemoveAllCourseUsersForCourse(savecouseListViewmodel.Courseid);
+                await _repository.RemoveAllCourseUsersForCourseAsync(savecouseListViewmodel.Courseid);
 
                 foreach (var userid in savecouseListViewmodel.Userids)
                 {
-                    await _repository.AddCourseUser(  savecouseListViewmodel.Courseid, userid);
+                    await _repository.AddCourseUserAsync(  savecouseListViewmodel.Courseid, userid);
                 }
 
-                await _repository.SaveChanges();
+                await _repository.SaveChangesAsync();
             }
             catch (Exception ex)
             {

@@ -44,10 +44,10 @@ namespace LMS_1_1.Controllers
         */
         // GET: api/CourseSettings/5
         // [HttpGet("{CourseId, StartDate, EndDate}", Name = "GetAsync")]
-        [HttpGet("GetAsync")]
-        public async Task<ActionResult<List<CourseSettingsViewModel>>> GetAsync(String CourseId, DateTime? StartDate, DateTime? EndDate)
+        [HttpGet("Get")]
+        public ActionResult<List<CourseSettingsViewModel>> Get(String CourseId, DateTime? StartDate, DateTime? EndDate)
         {
-            var res = await _programrepository.GetCourseSettingsAsync(CourseId, StartDate, EndDate);
+            var res =  _programrepository.GetCourseSettings(CourseId, StartDate, EndDate);
             return Ok(res);
         }
 

@@ -48,7 +48,7 @@ export class ScheduleService  implements  OnDestroy {
 
    public GetModulesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentites[][]>| undefined
 {
-   return this.http.post<Scheduleentites[][]>(this.courseUrl+'/ModulesWithColor',  scheduleFormModel,
+   return this.http.post<Scheduleentites[][]>(this.courseUrl+'/ModulesWithColorAsync',  scheduleFormModel,
    {headers: this.getAuthHeader() 
 }).pipe(
    tap(result => JSON.stringify(result)),
@@ -58,7 +58,7 @@ export class ScheduleService  implements  OnDestroy {
 
 public GetActivitiesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentites[][]>| undefined
 {
-   return this.http.post<Scheduleentites[][]>(this.courseUrl+'/ActivitiesWithColor',  scheduleFormModel,
+   return this.http.post<Scheduleentites[][]>(this.courseUrl+'/ActivitiesWithColoAsyncr',  scheduleFormModel,
    {headers: this.getAuthHeader() 
 }).pipe(
    tap(result => JSON.stringify(result)),
@@ -68,7 +68,7 @@ public GetActivitiesWithColour(scheduleFormModel:ScheduleFormModel) : Observable
 
  public GetCourseSettings(courseId:string, startDate:Date, endDate: Date)
 {
-  return this.http.get<CourseSettingsViewModel[]>(this.coursesettingsUrl+'/GetAsync?CourseId='+courseId+'&StartDate='+startDate.toLocaleString()+'&EndDate='+endDate.toLocaleString(),
+  return this.http.get<CourseSettingsViewModel[]>(this.coursesettingsUrl+'/Get?CourseId='+courseId+'&StartDate='+startDate.toLocaleString()+'&EndDate='+endDate.toLocaleString(),
   {headers: this.getAuthHeader() 
 }).pipe(
   tap(result => JSON.stringify(result)),

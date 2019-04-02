@@ -181,7 +181,7 @@ namespace LMS_1_1.Repository
             return course;
 
         }
-         public async Task<CourseAllViewModel> GetCourseAndModule(Guid courseId)
+         public async Task<CourseAllViewModel> GetCourseAndModuleAsync(Guid courseId)
         {
             var course1 = await _ctx.Courses
                           .Include(c => c.Modules)
@@ -327,8 +327,8 @@ namespace LMS_1_1.Repository
                 tempend = mod.EndDate.AddDays(noOfDays);
                 if(cloneFormModel.CloneTypeId==1)
                 {
-                    tempstart = skipWeekEnd(tempstart);
-                    tempend = skipWeekEnd(tempend);
+                    tempstart = SkipWeekEnd(tempstart);
+                    tempend = SkipWeekEnd(tempend);
                 }
 
                 Module tmp2 = new Module
@@ -361,8 +361,8 @@ namespace LMS_1_1.Repository
                     tempend = act.EndDate.AddDays(noOfDays);
                     if (cloneFormModel.CloneTypeId == 1)
                     {
-                        tempstart = skipWeekEnd(tempstart);
-                        tempend = skipWeekEnd(tempend);
+                        tempstart = SkipWeekEnd(tempstart);
+                        tempend = SkipWeekEnd(tempend);
                     }
 
 
@@ -420,7 +420,7 @@ namespace LMS_1_1.Repository
             return new Course();
         }
 
-        public async Task<List<CourseSettingsViewModel>> GetCourseSettingsAsync(string courseId, DateTime? startDate, DateTime? endDate)
+        public List<CourseSettingsViewModel> GetCourseSettings(string courseId, DateTime? startDate, DateTime? endDate)
         {
             IFormatProvider culture = new CultureInfo("sv-SE", true);
             List<CourseSettingsViewModel> svar = new List<CourseSettingsViewModel>();
@@ -453,7 +453,7 @@ namespace LMS_1_1.Repository
             return svar;
         }
 
-        private DateTime skipWeekEnd(DateTime start)
+        private DateTime SkipWeekEnd(DateTime start)
         {
             if (start.DayOfWeek == DayOfWeek.Saturday || start.DayOfWeek == DayOfWeek.Sunday)
             {
@@ -504,7 +504,7 @@ namespace LMS_1_1.Repository
             }
         }
 
-        public async Task<ModelAllViewModel> GetModulesAndActivitiesFromModulid(Guid moduleId)
+        public async Task<ModelAllViewModel> GetModulesAndActivitiesFromModulidAsync(Guid moduleId)
         {
             var Module = await _ctx.Modules
                             .Include(m => m.LMSActivities)
@@ -549,7 +549,7 @@ namespace LMS_1_1.Repository
             return Module1;
         }
 
-        public async Task<List<ScheduleViewModel>[]> GetModulesWithColour(ScheduleFormModel scheduleFormModel, string userid)
+        public async Task<List<ScheduleViewModel>[]> GetModulesWithColourAsync(ScheduleFormModel scheduleFormModel, string userid)
         {
             ColorModule  defaultcolor;
 
@@ -570,7 +570,7 @@ namespace LMS_1_1.Repository
                                 ).FirstOrDefaultAsync();
 
 
-            var coursesettings = await GetCourseSettingsAsync(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
+            var coursesettings =  GetCourseSettings(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
             var minCsstart = coursesettings.Min(cs => cs.StartTime);
             var maxCsend = coursesettings.Max(cs => cs.EndTime);
 
@@ -653,7 +653,7 @@ namespace LMS_1_1.Repository
             return await _DocumentRepository.RemoveDocumentRangeAsync(docModule.ToList());
         }
 
-        public async Task<bool> MoveModule(ModuleViewModel modelVm)
+        public async Task<bool> MoveModuleAsync(ModuleViewModel modelVm)
         {
             var old_module = await _ctx.Modules.Where(m => m.Id.ToString() == modelVm.Id).FirstOrDefaultAsync();
             var diffstart = old_module.StartDate - modelVm.StartDate;
@@ -697,7 +697,7 @@ namespace LMS_1_1.Repository
 
         }
 
-        public async Task<List<ScheduleViewModel>[]> GetActivitiesWithColour(ScheduleFormModel scheduleFormModel, string userid)
+        public async Task<List<ScheduleViewModel>[]> GetActivitiesWithColourAsync(ScheduleFormModel scheduleFormModel, string userid)
         {
             ColorActivity defaultcolor;
 
@@ -732,7 +732,7 @@ namespace LMS_1_1.Repository
                                 && (m.StartDate <= scheduleFormModel.EndTime)))
 
                 .SelectMany(m => m.LMSActivities).ToListAsync();*/
-            var coursesettings = await GetCourseSettingsAsync(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
+            var coursesettings =  GetCourseSettings(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
 
             var minCsstart = coursesettings.Min(cs => cs.StartTime);
             var maxCsend = coursesettings.Max(cs => cs.EndTime);
@@ -751,7 +751,7 @@ namespace LMS_1_1.Repository
 
             ;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
@@ -787,7 +787,7 @@ namespace LMS_1_1.Repository
 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
@@ -822,7 +822,7 @@ namespace LMS_1_1.Repository
                   ActivityTypeId = x.mod.ActivityTypeId
               }).ToList();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                     throw;
@@ -855,7 +855,7 @@ namespace LMS_1_1.Repository
                           }).ToList();
 
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                     throw;
@@ -888,7 +888,7 @@ namespace LMS_1_1.Repository
                           }).ToList();
 
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                     throw;
@@ -922,7 +922,7 @@ namespace LMS_1_1.Repository
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
                 throw;
@@ -940,7 +940,7 @@ namespace LMS_1_1.Repository
             return await _DocumentRepository.RemoveDocumentRangeAsync(docActivity.ToList());
         }
 
-        public async Task<ICollection<ActivityViewModel>> GetActivitiesFromModulid(Guid moduleId)
+        public async Task<ICollection<ActivityViewModel>> GetActivitiesFromModulidAsync(Guid moduleId)
         {
 
             var Activities = await _ctx.LMSActivity
@@ -1001,7 +1001,7 @@ namespace LMS_1_1.Repository
             return (yearAndDate1.Year - yearAndDate2.Year) * 52 + yearAndDate1.Week - yearAndDate2.Week;
         }
 
-        public async Task<bool> MoveLMSActivity(ActivityFormModel modelVm)
+        public async Task<bool> MoveLMSActivityAsync(ActivityFormModel modelVm)
         {
             // Get old LMSActivity
             
@@ -1083,7 +1083,7 @@ namespace LMS_1_1.Repository
                 CourseId = firstM.CourseId
             };
 
-            var status= await UpdateModule(module);
+            var status= await UpdateModuleAsync(module);
 
             
             if(status)
@@ -1108,7 +1108,7 @@ namespace LMS_1_1.Repository
                         ModuleId = activity.ModuleId,
                         ActivityTypeId = activity.ActivityTypeId
                     };
-                    status = await UpdateActivity(modActivity);
+                    status = await UpdateActivityAsync(modActivity);
 
                 }
 
@@ -1136,7 +1136,7 @@ namespace LMS_1_1.Repository
                         CourseId = modul.CourseId
                     };
 
-                    status = await UpdateModule(edmodule);
+                    status = await UpdateModuleAsync(edmodule);
                     if(status)
                     {
                         var edActivites = await _ctx.LMSActivity
@@ -1157,7 +1157,7 @@ namespace LMS_1_1.Repository
                                 ModuleId = activity.ModuleId,
                                 ActivityTypeId = activity.ActivityTypeId
                             };
-                            status = await UpdateActivity(modActivity);
+                            status = await UpdateActivityAsync(modActivity);
 
                         }
                     }
@@ -1191,7 +1191,7 @@ namespace LMS_1_1.Repository
             WorkEnd += TimeSpan.FromDays(2 * diffweeksresend);
         }
 
-        private async Task<bool> UpdateActivity(LMSActivity modActivity)
+        private async Task<bool> UpdateActivityAsync(LMSActivity modActivity)
         {
             _ctx.Entry(modActivity).State = EntityState.Modified;
 
@@ -1214,7 +1214,7 @@ namespace LMS_1_1.Repository
             return true;
         }
 
-        private async Task<bool> UpdateModule(Module module)
+        private async Task<bool> UpdateModuleAsync(Module module)
         {
             _ctx.Entry(module).State = EntityState.Modified;
 
@@ -1273,7 +1273,7 @@ namespace LMS_1_1.Repository
 
         #region Token user
 
-        public async Task AddTokenUser(string token, string userid)
+        public async Task AddTokenUserAsync(string token, string userid)
         {
             var model = new TokenUser
             {
@@ -1284,7 +1284,7 @@ namespace LMS_1_1.Repository
             await _ctx.AddAsync(model);
         }
 
-        public async Task<bool> RemoveTokenUser(string token)
+        public async Task<bool> RemoveTokenUserAsync(string token)
         {
             var models = _ctx.TokenUsers.Where(tu => tu.Token == token);
 
@@ -1293,7 +1293,7 @@ namespace LMS_1_1.Repository
         }
 
 
-        public async Task<bool> IsTeacher(string token)
+        public async Task<bool> IsTeacherAsync(string token)
         {
             var User = _ctx.TokenUsers
                  .Include(tu => tu.LMSUser)
@@ -1311,7 +1311,7 @@ namespace LMS_1_1.Repository
 
         #endregion
 
-        public async Task<bool> CheckIfModuleInRange(string courseid, DateTime start, DateTime end)
+        public async Task<bool> CheckIfModuleInRangeAsync(string courseid, DateTime start, DateTime end)
         {
           return await  _ctx.Modules
                  .Where(m => m.CourseId.ToString() == courseid)
@@ -1320,7 +1320,7 @@ namespace LMS_1_1.Repository
              ).AnyAsync();
         }
 
-        public async Task<bool> CheckIfActivityInRange(string modulid, DateTime start, DateTime end)
+        public async Task<bool> CheckIfActivityInRangeAsync(string modulid, DateTime start, DateTime end)
         {
             return await _ctx.LMSActivity
          .Where(m => m.ModuleId.ToString() == modulid)
