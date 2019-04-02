@@ -12,6 +12,7 @@ export class Scheduleentites
     zindex:number=0;
     width:number=100;
     left:number=0;
+    activitytypid?:number=null;
 }
  export class findKmodel 
  {
@@ -21,6 +22,19 @@ export class Scheduleentites
      lastend:Date;
 }
 
+export class ScheduleColors
+{
+    id?:string;
+    activitytypid?:number=null;
+    color: string;
+}
+
+export class ScheduleTimes
+{
+    length:number;
+    offsettime: number;
+    name:string; 
+}
 export class weekdays
 {
     id:number;

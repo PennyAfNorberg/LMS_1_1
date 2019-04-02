@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { ScheduleColors, Scheduleentites } from '../Schedule/Scheduleentites';
 
 @Injectable({
   providedIn: 'root'
@@ -82,10 +83,28 @@ export class LoginMessageHandlerService {
  private WeekSource = new BehaviorSubject<Date>(null);
  Week = this.WeekSource.asObservable();
 
+ private ScheduleColorSource = new BehaviorSubject<ScheduleColors>(null);
+ ScheduleColor= this.ScheduleColorSource.asObservable();
+  
+ 
+ private ChangedEntitySource  = new BehaviorSubject<Scheduleentites>(null);
+ ChangedEntity= this.ChangedEntitySource.asObservable();
 
 
 
   constructor() { }
+
+public SendChangeEntity(Scheduleentity:Scheduleentites): boolean
+{
+  this.ChangedEntitySource.next(Scheduleentity);
+  return true;
+}
+
+   public SendScheduleColor(ScheduleColor:ScheduleColors): boolean 
+  {
+      this.ScheduleColorSource.next(ScheduleColor);
+      return true;
+  }
 
   public SendWeek(week:Date) : boolean 
   {      

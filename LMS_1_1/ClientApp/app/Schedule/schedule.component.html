@@ -11,7 +11,14 @@
     </div>
   </div>
     <div *ngIf="entities" class="row">
-    <div class="offset-1"></div>
+    <div class="offset-1 border border-white nopad">
+      <span>Cl</span>
+      <div *ngFor="let cl of cls"
+      [style.height.em]="cl.length"
+      [style.top.em]="cl.offsettime"
+      style="position:relative;">{{cl.name}}</div>
+
+    </div>
   <div class="col-2 border border-dark nopad" *ngFor="let weekday of weekdays"
   [style.height.em]="maxlength"
   > 
