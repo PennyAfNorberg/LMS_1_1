@@ -140,7 +140,7 @@ export class EditComponent implements OnInit, OnDestroy {
         this.messhandler.SendDubbType("Activity");
         this.messhandler.SendDubbStart(startdatework);
         this.messhandler.SendDubbEnd(enddatework);
-        this.messhandler.SendWeek(startdatework);
+      //  this.messhandler.SendWeek(startdatework);
         this.messhandler.SendChangeEntity(this.buildEntity(startdatework,enddatework));
      }
   
@@ -160,7 +160,8 @@ export class EditComponent implements OnInit, OnDestroy {
       zindex:0,
       width:100,
       left:0,
-
+      startD:startdatework,
+      endD:enddatework,
       operationid:2
       
     }

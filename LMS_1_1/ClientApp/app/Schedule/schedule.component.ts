@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { Subject, VirtualTimeScheduler } from 'rxjs';
+import { Subject, VirtualTimeScheduler, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { CourseService } from '../Courses/course.service';
 import { takeUntil } from 'rxjs/operators';
@@ -31,9 +31,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   maxlength:number=2;
   errorMessage: string;
   actsub: any= null;
+  sub:any =null;
   position:string="relative";
   courseSettings: CourseSettingsViewModel[];
  private size2: number;
+  getinprogress: boolean;
   get week()
   {
     return this._week;
@@ -143,12 +145,23 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   
   }
 
-  private requery(): any {
+  private async requery() :Promise<void> {
    // if all pars send q
-    if(this.actsub!=null)
-      this.actsub.unsubscribe();
+   this.getinprogress=true;
+   let entities: Scheduleentity[][];
+   let cs:CourseSettingsViewModel[];
+   let newColor:ScheduleColors;
+   
+    if(this.sub!=null)
+      this.sub.unsubscribe();
+      if(this.actsub!=null)
+      this.actsub.unsubscribe();  
     if(this.type=="Activities")
     {
+       entities = await this.ScheduleService
+      .GetActivitiesWithColour(this.scheduleFormModel).toPromise();
+       
+/*
       this.actsub=this.ScheduleService.GetActivitiesWithColour(this.scheduleFormModel)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
@@ -156,14 +169,19 @@ export class ScheduleComponent implements OnInit, OnDestroy {
          {
          // this.entities=entities;
             this.GetCourseSettings(entities);
+            
             this.cd.markForCheck();
          },
          error => this.errorMessage = <any>error
-      );
+      );*/
     }
     if(this.type=="Modules")
     {
-      this.actsub=this.ScheduleService.GetModulesWithColour(this.scheduleFormModel)
+      entities = await this.ScheduleService
+      .GetModulesWithColour(this.scheduleFormModel).toPromise();
+
+
+    /*  this.actsub=this.ScheduleService.GetModulesWithColour(this.scheduleFormModel)
       .pipe(takeUntil(this.unsubscribe))
       .subscribe(
          (entities: Scheduleentity[][])  =>
@@ -173,12 +191,22 @@ export class ScheduleComponent implements OnInit, OnDestroy {
             this.cd.markForCheck();
          },
          error => this.errorMessage = <any>error
-      );
+      );*/
     }
-
+    cs=await this.ScheduleService.GetCourseSettings(this.scheduleFormModel.courseId, this.scheduleFormModel.startTime, this.scheduleFormModel.endTime)
+    .toPromise();
+    if(cs!= null)
+    {
+      this.courseSettings=cs;
+      this.calculatemaxlength();
+      this.AddSchedulesTimes();
+      this.mapEntities(entities);
+      this.actsub=this.ListenForExternalChangesColor()
+      this.sub= this.ListenForExternalChanges();
+    }
   }
 
-   private GetCourseSettings(entities: Scheduleentity[][])
+   private async GetCourseSettings(entities: Scheduleentity[][])
    {
     this.ScheduleService.GetCourseSettings(this.scheduleFormModel.courseId, this.scheduleFormModel.startTime, this.scheduleFormModel.endTime)
     .pipe(takeUntil(this.unsubscribe))
@@ -189,14 +217,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
           this.calculatemaxlength();
           this.AddSchedulesTimes();
           this.mapEntities(entities);
+          this.getinprogress=false;
           this.ListenForExternalChanges();
           this.cd.markForCheck();
         }
 
     );
    }
- private ListenForExternalChanges(): void {
-    this.messhandler.ScheduleColor
+ private ListenForExternalChangesColor(): Subscription {
+   return  this.messhandler.ScheduleColor
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
           (newColor:ScheduleColors)  =>
@@ -208,7 +237,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
             this.cd.markForCheck();
            }  
     );
-    this.messhandler.ChangedEntity
+          }
+
+    private ListenForExternalChanges(): Subscription {
+  return  this.messhandler.ChangedEntity
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
           (newEntity:Scheduleentity) =>
@@ -221,32 +253,34 @@ export class ScheduleComponent implements OnInit, OnDestroy {
           }
     );
 
-    // add listen for cud
+  
   }
  private AddEntity(newEntity: Scheduleentity):void {
   //  throw new Error("Method not implemented.");
 
   // get this.entities, ad this one, set calc props to null for all affekted, the same day? a and the runt map?
    let entities=this.entities;
-   let est:Date,eend:Date;
-   let nst:Date,nend:Date;
-   newEntity.startD=new Date(newEntity.startTime);
-   newEntity.endD=new Date(newEntity.endTime);
+   let est:Date,eend:Date,lastst:Date;
+   let nst:Date,nend:Date,lastend:Date;
+  // newEntity.startD=new Date(newEntity.startTime);
+  // newEntity.endD=new Date(newEntity.endTime);
    nst=newEntity.startD;
    nend=newEntity.endD;
+   let deleted:boolean;
    let undone=true;
 //GrEDate(a:Date, b:Date)
-let rowid=0
+let rowid=1
 let entid=0
 let maxentid=0;
-
+lastst=entities[rowid][entid].startD;
+lastend=entities[rowid][entid].endD;
    while(rowid< entities.length)
     {
         entid=0
         maxentid=entities[rowid].length;
         while(entid <maxentid)
         {
-       
+          deleted=false;
             est=entities[rowid][entid].startD;
             eend=entities[rowid][entid].endD;
             if(newEntity.operationid==2 && entities[rowid][entid].operationid!=2)
@@ -256,7 +290,7 @@ let maxentid=0;
 
                   entities[rowid].splice(entid,1);
                   maxentid--;
-                  
+                  deleted=true;
               }
 
             }
@@ -272,55 +306,69 @@ let maxentid=0;
 
             if(newEntity.operationid==1 || newEntity.operationid==2)
             {
-            if(entid<maxentid && this.GrEDate(nend,est) && this.GrEDate(eend,nst) ) // fast hela dagarna?
-            {
- 
-              entities[rowid][entid].length=null;
-              entities[rowid][entid].offsettime=null;
-              entities[rowid][entid].zindex=null;
-              entities[rowid][entid].width=null;
-              entities[rowid][entid].left=null;
-              if(undone)
+              if((entid==0 || entid<maxentid) && this.GrEDate(nend,est) && this.GrEDate(eend,nst) ) // fast hela dagarna?
               {
-                if(entid==0)
-                { // strange?
-                    // if nst >= fram  but <=ost and lst>olst  nst => 0, skift the rest
-                    if(newEntity.startD<=entities[rowid][entid].startD && this.datediff(newEntity.startD,newEntity.endD)>= this.datediff(entities[rowid][entid].endD,entities[rowid][entid].startD))
-                    {
-                      entities[rowid].splice(entid,0,newEntity);
-                      maxentid++;
-                      undone=false;
-                    }
-                    // else do nothing
-                }
-                else
+                this.resetNM(est,eend);
+                if(!deleted)
                 {
-                  // if lst<=nst<=rst and ll<=nl<=rll then nst between l och r, skift the rest 
-                  if((entities[rowid][entid-1].startD<=newEntity.startD)
-                  && (newEntity.startD<=entities[rowid][entid].startD )
-                  && (this.datediff(entities[rowid][entid-1].endD,entities[rowid][entid-1].startD)>=this.datediff(newEntity.startD,newEntity.endD) )
-                  && (this.datediff(newEntity.startD,newEntity.endD) >=this.datediff(entities[rowid][entid].endD,entities[rowid][entid].startD) ))
-                  {
-                    entities[rowid].splice(entid,0,newEntity);
-                    maxentid++;
-                    undone=false;
-                  } 
-                  else
-                  {
-                      if (entid+1==entities[rowid].length)
+                  entities[rowid][entid].length=null;
+                  entities[rowid][entid].offsettime=null;
+                  entities[rowid][entid].zindex=null;
+                  entities[rowid][entid].width=null;
+                  entities[rowid][entid].left=null;
+                }
+                if(undone)
+                {
+                  if(entid==0)
+                  { // strange?
+                      // if nst >= fram  but <=ost and lst>olst  nst => 0, skift the rest
+                      if(newEntity.startD<= est && this.datediff(newEntity.endD,newEntity.startD)>= this.datediff(eend, est))
                       {
                         entities[rowid].splice(entid,0,newEntity);
                         maxentid++;
                         undone=false;
-                      } 
+                      }
+                      else
+                      {
+                        if (entid+1>=entities[rowid].length)
+                        {
+                          entities[rowid].splice(entid,0,newEntity);
+                          maxentid++;
+                          undone=false;
+                        } 
 
+                      }
+                      // else do nothing
                   }
-                  // else if no r, add nst last, no skift.
+                  else
+                  {
+                    // if lst<=nst<=rst and ll<=nl<=rll then nst between l och r, skift the rest 
+                    if((lastst<=newEntity.startD)
+                    && (newEntity.startD<=est)
+                    && (this.datediff(lastend,lastst)>=this.datediff(newEntity.endD,newEntity.startD) )
+                    && (this.datediff(newEntity.endD,newEntity.startD) >=this.datediff(eend,est) ))
+                    {
+                      entities[rowid].splice(entid,0,newEntity);
+                      maxentid++;
+                      undone=false;
+                    } 
+                    else
+                    {
+                        if (entid+1>=entities[rowid].length)
+                        {
+                          entities[rowid].splice(entid,0,newEntity);
+                          maxentid++;
+                          undone=false;
+                        } 
 
+                    }
+                    // else if no r, add nst last, no skift.
+                  }
                 }
-              }
-
-            }
+             }
+             if(deleted) entid--;
+             lastst=est;
+             lastend=eend;
 
         }
          entid++;
@@ -328,6 +376,34 @@ let maxentid=0;
       rowid++;
     }
     this.mapEntities( entities);
+  }
+ private resetNM(est: Date, eend: Date): void {
+    let k=0;
+    let sizek=this.courseSettings.length;
+    let lastend=this.courseSettings[k].startD;
+    while((k< sizek) && (this.courseSettings[k].endD < est)    )
+    {
+      k++;
+      let startTime2=this.courseSettings[k].startD;
+      if(this.compDay(lastend,startTime2))
+      {
+        lastend=this.courseSettings[k].endD;
+      }
+      else
+      { // new Day
+        lastend=startTime2;
+      }
+     
+      
+    }
+    while((k< sizek) && this.courseSettings[k].endD <= eend  )
+    {
+        this.courseSettings[k].n=-1;
+        this.courseSettings[k].m=0;
+        k++;
+
+    }
+
   }
 
 
@@ -472,7 +548,7 @@ let maxentid=0;
              
               laststart=parmsK.startTime;
               let ent=entities[paramsSet.i][paramsSet.j];
-              this.setN(entities,ent,paramsSet);
+              this.setN(entities,0);
 
               //set present
               
@@ -530,18 +606,18 @@ let maxentid=0;
    {
      return (s1<= e2) && (e1 >=s2);
    }
-   private setN(entities: Scheduleentity[][],ent:Scheduleentity,paramsSet: {i:number,j:number}): void
+   private setN(entities: Scheduleentity[][], extraN:number): void
    {
       
       // only call if not set so no check if cell is worked.
       if(this.courseSettings[this.k].n==-1)
       {
-        let startTime=ent.startD;
-        let endTime=ent.endD;
+      //  let startTime=ent.startD;
+       // let endTime=ent.endD;
         let csStartTime=this.courseSettings[this.k].startD;
         let csEndTime =this.courseSettings[this.k].endD;
-        startTime=(startTime<csStartTime || startTime > csEndTime)?csStartTime:startTime;
-        endTime=(endTime>csEndTime || endTime<csStartTime)?csEndTime:endTime;
+       // startTime=(startTime<csStartTime || startTime > csEndTime)?csStartTime:startTime;
+       // endTime=(endTime>csEndTime || endTime<csStartTime)?csEndTime:endTime;
         //let tmpent=entities[paramsSet.i];
        // let test=[];
          let i=0;
@@ -549,7 +625,7 @@ let maxentid=0;
         {
            for(let cs of row)
            {
-              if(this.checkpred(cs.startD,startTime,cs.endD, endTime ))
+              if(this.checkpred(cs.startD,csStartTime,cs.endD, csEndTime ))
               {
               //  test[i]=cs;
                 i++;
@@ -557,7 +633,7 @@ let maxentid=0;
             }
         } 
 
-        this.courseSettings[this.k].n=i;
+        this.courseSettings[this.k].n=i+extraN;
       }
       
       if(this.courseSettings[this.k].n != -1)
@@ -577,7 +653,7 @@ let maxentid=0;
 
  private setPresent(entities: Scheduleentity[][], parmsK: findKmodel, paramsSet: { i: number; j: number; }, startt: Date, endt: Date,sizek :number,size1:number): void
  {
-  let ent={... entities[paramsSet.i][paramsSet.j]};
+  let ent=entities[paramsSet.i][paramsSet.j];
   entities[paramsSet.i][paramsSet.j].offsettime=this.datediff(startt,parmsK.startTime)
    if(this.m==0)
    {
@@ -642,8 +718,9 @@ let maxentid=0;
         }
         if(paramsSet.i< size1)
         { // måste placera rätt här.
-          this.setN(entities,ent,paramsSet ); 
-
+          this.setN(entities,1 ); 
+          // need to count the next insert too
+ 
 
           let offsettime=0;
           offsettime+=this.datediff(parmsK.startTime,parmsK.lastend);
@@ -688,7 +765,7 @@ let maxentid=0;
             break;
         else
         {  
-          this.setN(entities,ent,paramsSet);
+          this.setN(entities,0);
           let startTime2=this.courseSettings[this.k].startD;
           if(this.compDay(parmsK.laststart,startTime2))
           {
