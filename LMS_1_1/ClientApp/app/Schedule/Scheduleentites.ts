@@ -1,4 +1,4 @@
-export class Scheduleentites
+export class Scheduleentity
 {
     weekday: string="";
     id:string;
@@ -13,7 +13,17 @@ export class Scheduleentites
     width:number=100;
     left:number=0;
     activitytypid?:number=null;
+    startD?:Date;
+    endD?:Date;
+    operationid?: number;
 }
+
+ export class Operation
+ {
+     id: number;
+    name:string;
+ }
+
  export class findKmodel 
  {
      startTime:Date;
@@ -59,4 +69,6 @@ export class CourseSettingsViewModel
     forDate:Date;
     m:number;
     n:number;
+    startD?:Date;
+    endD?:Date;
 }

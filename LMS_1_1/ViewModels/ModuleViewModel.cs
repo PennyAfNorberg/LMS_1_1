@@ -20,5 +20,7 @@ namespace LMS_1_1.ViewModels
 
         [Required]
         public Guid CourseId { get; set; }
+
+        public string Color { get; set; }
     }
 }

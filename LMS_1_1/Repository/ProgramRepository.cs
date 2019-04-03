@@ -697,6 +697,56 @@ namespace LMS_1_1.Repository
 
         }
 
+        public async Task<ActivityViewModel> GetActivityByIdWithColorAsync(Guid activityId, string userid)
+        {
+
+            var temp= await _ctx.LMSActivity
+                 .Include(a => a.ActivityType)
+                 .Include(a => a.Modules)
+                 .FirstOrDefaultAsync(a => a.Id == activityId);
+
+            
+            var colorfromid= await _ctx.ColorActivity
+                                 .Where(
+                                 cm =>
+                                 (cm.LMSUserId ?? userid) == userid
+                                 && cm.LMSActivityId != null
+                                 && cm.Id==temp.Id
+                                 ).FirstOrDefaultAsync();
+            var colorfromtype = await _ctx.ColorActivity
+                          .Where(
+                          cm =>
+                          (cm.LMSUserId ?? userid) == userid
+                          && cm.LMSActivityId == null
+                          && cm.AktivityTypeID != null
+                          ).FirstOrDefaultAsync();
+
+            var defaultcolor = await _ctx.ColorActivity
+                            .Where(
+                            cm =>
+                            (cm.LMSUserId ?? userid) == userid
+                            && cm.LMSActivityId == null
+                            && cm.AktivityTypeID == null
+                            ).FirstOrDefaultAsync();
+
+            var thecolor = (colorfromid ?? (colorfromtype ?? defaultcolor));
+
+            return new ActivityViewModel
+            {
+                Id = temp.Id,
+                Name = temp.Name,
+                Description = temp.Description,
+                StartDate = temp.StartDate,
+                EndDate = temp.EndDate,
+                ActivityTypeId = temp.ActivityTypeId,
+                Modulid = temp.ModuleId,
+                Color = thecolor.Color
+            };
+
+
+
+        }
+
         public async Task<List<ScheduleViewModel>[]> GetActivitiesWithColourAsync(ScheduleFormModel scheduleFormModel, string userid)
         {
             ColorActivity defaultcolor;
@@ -732,7 +782,7 @@ namespace LMS_1_1.Repository
                                 && (m.StartDate <= scheduleFormModel.EndTime)))
 
                 .SelectMany(m => m.LMSActivities).ToListAsync();*/
-            var coursesettings =  GetCourseSettings(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
+        var coursesettings =  GetCourseSettings(scheduleFormModel.CourseId, scheduleFormModel.StartTime, scheduleFormModel.EndTime);
 
             var minCsstart = coursesettings.Min(cs => cs.StartTime);
             var maxCsend = coursesettings.Max(cs => cs.EndTime);

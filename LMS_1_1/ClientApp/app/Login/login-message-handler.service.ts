@@ -1,12 +1,26 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ScheduleColors, Scheduleentites } from '../Schedule/Scheduleentites';
+import { ScheduleColors, Scheduleentity, Operation } from '../Schedule/Scheduleentites';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LoginMessageHandlerService {
 
+   public operations:Operation[]=[
+    {
+      id: 1,
+      name: "Create"
+    },
+    {
+      id: 2,
+      name: "Edit"
+    },
+    {
+      id: 3,
+      name: "Delete"
+    },
+   ];
   private startstring?:string="";
    // To add And make choose to save
   private useridSource = new BehaviorSubject<string>(this.startstring);
@@ -87,14 +101,14 @@ export class LoginMessageHandlerService {
  ScheduleColor= this.ScheduleColorSource.asObservable();
   
  
- private ChangedEntitySource  = new BehaviorSubject<Scheduleentites>(null);
+ private ChangedEntitySource  = new BehaviorSubject<Scheduleentity>(null);
  ChangedEntity= this.ChangedEntitySource.asObservable();
 
 
 
   constructor() { }
 
-public SendChangeEntity(Scheduleentity:Scheduleentites): boolean
+public SendChangeEntity(Scheduleentity:Scheduleentity): boolean
 {
   this.ChangedEntitySource.next(Scheduleentity);
   return true;

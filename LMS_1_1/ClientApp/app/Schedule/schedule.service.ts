@@ -3,7 +3,7 @@ import { Subject, throwError, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { takeUntil, tap, catchError } from 'rxjs/operators';
-import { ScheduleFormModel, Scheduleentites, CourseSettingsViewModel } from './Scheduleentites';
+import { ScheduleFormModel,  CourseSettingsViewModel, Scheduleentity } from './Scheduleentites';
 
 @Injectable({
   providedIn: 'root'
@@ -46,9 +46,9 @@ export class ScheduleService  implements  OnDestroy {
         public DateTime EndTime { get; set; }
 */
 
-   public GetModulesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentites[][]>| undefined
+   public GetModulesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentity[][]>| undefined
 {
-   return this.http.post<Scheduleentites[][]>(this.courseUrl+'/ModulesWithColorAsync',  scheduleFormModel,
+   return this.http.post<Scheduleentity[][]>(this.courseUrl+'/ModulesWithColor',  scheduleFormModel,
    {headers: this.getAuthHeader() 
 }).pipe(
    tap(result => JSON.stringify(result)),
@@ -56,9 +56,9 @@ export class ScheduleService  implements  OnDestroy {
 );
 }
 
-public GetActivitiesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentites[][]>| undefined
+public GetActivitiesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentity[][]>| undefined
 {
-   return this.http.post<Scheduleentites[][]>(this.courseUrl+'/ActivitiesWithColoAsyncr',  scheduleFormModel,
+   return this.http.post<Scheduleentity[][]>(this.courseUrl+'/ActivitiesWithColor',  scheduleFormModel,
    {headers: this.getAuthHeader() 
 }).pipe(
    tap(result => JSON.stringify(result)),

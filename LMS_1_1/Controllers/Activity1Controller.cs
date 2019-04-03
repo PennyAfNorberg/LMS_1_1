@@ -48,10 +48,11 @@ namespace LMS_1_1.Controllers
         // GET: api/Activity1/5
         [HttpGet("{id}")]
         [Authorize(Roles = ConstDefine.R_TEACHER)]
-        public async Task<ActionResult<LMSActivity>> GetActivityById(string id)
+        public async Task<ActionResult<ActivityViewModel>> GetActivityById(string id)
         {
             Guid idG = Guid.Parse(id);
-            LMSActivity Activity = await _context.LMSActivity.FindAsync(idG);
+            string userid = (await _userManager.FindByNameAsync(User.Identity.Name)).Id;
+            ActivityViewModel Activity = await _programrepository.GetActivityByIdWithColorAsync(idG, userid);
 
 
             if (Activity == null)

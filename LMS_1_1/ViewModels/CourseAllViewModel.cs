@@ -57,6 +57,8 @@ namespace LMS_1_1.ViewModels
         public int? ActivityTypeId { get; set; }
         public Guid? Modulid { get; set; }
 
+        public string Color { get; set; }
+
     }
 
 }

@@ -43,6 +43,7 @@ namespace LMS_1_1.Repository
         Task<bool> IsTeacherAsync(string token);
         Task<bool> RemoveCourseHelperAsync(Guid courseid);
         Task<bool> RemoveModuleHelperAsync(Guid moduleid);
+        Task<ActivityViewModel> GetActivityByIdWithColorAsync(Guid idG, string userid);
         Task<bool> RemoveActivityHelperAsync(Guid activityid);
         Task<bool> MoveModuleAsync(ModuleViewModel modelVm);
         Task<bool> CheckIfModuleInRangeAsync(string courseid, DateTime start, DateTime end);

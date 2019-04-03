@@ -6,6 +6,7 @@ import { LoginMessageHandlerService } from 'ClientApp/app/Login/login-message-ha
 import { ActivitiesService } from '../activities.service';
 import { takeUntil } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
+import { Scheduleentity } from 'ClientApp/app/Schedule/Scheduleentites';
 
 @Component({
   selector: 'app-edit',
@@ -24,6 +25,7 @@ export class EditComponent implements OnInit, OnDestroy {
   Courseid: string ="";
   private startstartdate: Date;
 
+   private schedulentity: Scheduleentity;
   constructor(private db: AuthService
     , private cd: ChangeDetectorRef ,private route: ActivatedRoute
     ,private messhandler: LoginMessageHandlerService
@@ -119,31 +121,69 @@ export class EditComponent implements OnInit, OnDestroy {
         let startdatework:Date
         if((this.Activity.startDate.toLocaleString().length==16))
         {
-          startdatework=new Date(this.Activity.startDate+":00.000Z")
+          startdatework=new Date(this.Activity.startDate+":00.000")
         }
         else
         {
-          startdatework=this.Activity.startDate;
+          startdatework=new Date(this.Activity.startDate);
         }
         let enddatework:Date
         if((this.Activity.endDate.toLocaleString().length==16))
         {
-          enddatework=new Date(this.Activity.endDate+":59.000Z")
+          enddatework=new Date(this.Activity.endDate+":59.000")
         }
         else
         {
-          enddatework=this.Activity.endDate;
+          enddatework=new Date(this.Activity.endDate);
         }
         this.messhandler.SendDubbId(this.Activity.moduleid);
         this.messhandler.SendDubbType("Activity");
         this.messhandler.SendDubbStart(startdatework);
         this.messhandler.SendDubbEnd(enddatework);
         this.messhandler.SendWeek(startdatework);
+        this.messhandler.SendChangeEntity(this.buildEntity(startdatework,enddatework));
      }
   
     // post data
   }
+  buildEntity(startdatework:Date,enddatework:Date): Scheduleentity {
+    return  {
+      weekday:"",
+      id:this.Activity.id.toString(),
+      color:this.Activity.color,
+      length:null,
+      offsettime:null,
+      name:this.Activity.name,
+      description:this.Activity.description,
+      startTime:startdatework.toLocaleString(),
+      endTime:enddatework.toLocaleString(),
+      zindex:0,
+      width:100,
+      left:0,
 
+      operationid:2
+      
+    }
+
+  }
+/*export class Scheduleentity
+{
+    weekday: string="";
+    id:string;
+    color: string;
+    length:number;
+    offsettime: number;
+    name:string;
+    description:string;
+    startTime:string;
+    endTime:string;
+    zindex:number=0;
+    width:number=100;
+    left:number=0;
+    activitytypid?:number=null;
+    startD?:Date;
+    endD?:Date;
+}*/
   public move(): void
   {
      // Send to service => backend add diff date to all later once, change also start timdes to other with thesame start time
@@ -217,6 +257,7 @@ export class EditComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.messhandler.SendChangeEntity(null);
     this.unsubscribe.next();
     this.unsubscribe.complete();
   }
