@@ -88,7 +88,7 @@ namespace LMS_1_1.Controllers
                 StartDate = activtyVm.StartDate,
                 EndDate = activtyVm.EndDate,
                 Description = activtyVm.Description,
-                ModuleId = Guid.Parse(activtyVm.moduleid),
+                ModuleId = Guid.Parse(activtyVm.Moduleid),
                 ActivityTypeId= activtyVm.ActivityTypeId
             };
 
@@ -118,7 +118,7 @@ namespace LMS_1_1.Controllers
                 EndDate = activtyVm.EndDate,
                 Description = activtyVm.Description,
                 ActivityTypeId= activtyVm.ActivityTypeId,
-                ModuleId=Guid.Parse(activtyVm.moduleid)
+                ModuleId=Guid.Parse(activtyVm.Moduleid)
             };
 
             _context.Entry(Activity).State = EntityState.Modified;

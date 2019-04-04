@@ -5,6 +5,7 @@ export class Scheduleentity
     color: string;
     length:number;
     offsettime: number;
+    calcoffset:number;
     name:string;
     description:string;
     startTime:string;
@@ -30,6 +31,7 @@ export class Scheduleentity
      endTime:Date;
      laststart:Date;
      lastend:Date;
+     nextstart:Date;
 }
 
 export class ScheduleColors

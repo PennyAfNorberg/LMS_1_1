@@ -739,7 +739,7 @@ namespace LMS_1_1.Repository
                 StartDate = temp.StartDate,
                 EndDate = temp.EndDate,
                 ActivityTypeId = temp.ActivityTypeId,
-                Modulid = temp.ModuleId,
+                Moduleid = temp.ModuleId,
                 Color = thecolor.Color
             };
 
@@ -1073,7 +1073,7 @@ namespace LMS_1_1.Repository
                 EndDate = modelVm.EndDate,
                 Description = modelVm.Description,
                 ActivityTypeId = modelVm.ActivityTypeId,
-                ModuleId = Guid.Parse(modelVm.moduleid)
+                ModuleId = Guid.Parse(modelVm.Moduleid)
             };
 
             _ctx.Entry(ModActivity).State = EntityState.Modified;
@@ -1107,7 +1107,7 @@ namespace LMS_1_1.Repository
 
         private async Task<bool> SetLaterActivitesAsync(ActivityFormModel modelVm, TimeSpan diffstart, TimeSpan diffend,int diffweeks)
         {
-            var currmodulid = Guid.Parse(modelVm.moduleid);
+            var currmodulid = Guid.Parse(modelVm.Moduleid);
             // first M
             var firstM = await _ctx.Modules
                 .Where(m => m.Id == currmodulid)

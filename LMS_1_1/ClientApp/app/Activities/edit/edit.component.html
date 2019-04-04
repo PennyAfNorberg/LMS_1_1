@@ -7,7 +7,7 @@
             <div *ngIf="errorMessage" class="alert alert-warning">{{ errorMessage }}</div>
          <form #theForm="ngForm"  (ngSubmit)="Register(theForm)"  novalidate>	
 
-             <input type="hidden" [(ngModel)]="Activity.Moduleid" name="ModuleId" />	
+             <input type="hidden" [(ngModel)]="Activity.moduleid" name="moduleid" />	
 
              <div class="form-group">	
                 <label for="name" class="control-label">Name</label>	

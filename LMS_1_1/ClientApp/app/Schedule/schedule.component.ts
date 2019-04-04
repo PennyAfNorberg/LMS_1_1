@@ -35,7 +35,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   position:string="relative";
   courseSettings: CourseSettingsViewModel[];
  private size2: number;
-  getinprogress: boolean;
+  getinprogress: boolean=false;
   get week()
   {
     return this._week;
@@ -46,7 +46,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.scheduleFormModel.startTime=temp[0];
     this.scheduleFormModel.endTime=temp[1];
     this._week=value;
-    this.requery();
+    if(!this.getinprogress)
+    {
+       this.requery();
+    }
     
   }
    get startdate()
@@ -56,7 +59,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
    set startdate(value)
    {
     this.scheduleFormModel.startTime=value;
-    this.requery();
+    if(!this.getinprogress)
+    {
+       this.requery();
+    }
    }
 
    get enddate()
@@ -66,7 +72,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   set enddate(value)
   {
    this.scheduleFormModel.endTime=value;
-   this.requery();
+   if(!this.getinprogress)
+   {
+      this.requery();
+   }
   }
   private _type:string;
   get type()
@@ -76,7 +85,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   set type(value)
   {
     this._type= value;
-    this.requery();
+    if(!this.getinprogress)
+    {
+       this.requery();
+    }
   }
   private weekdays: weekdays[]; //=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   private entities:Scheduleentity[][];
@@ -141,13 +153,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
      // courseid
      // hämta data
      // format
-     this.requery();
+    this.requery();
   
   }
 
   private async requery() :Promise<void> {
    // if all pars send q
-   this.getinprogress=true;
+  
    let entities: Scheduleentity[][];
    let cs:CourseSettingsViewModel[];
    let newColor:ScheduleColors;
@@ -156,8 +168,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.sub.unsubscribe();
       if(this.actsub!=null)
       this.actsub.unsubscribe();  
+      this.getinprogress=true;
     if(this.type=="Activities")
     {
+       
        entities = await this.ScheduleService
       .GetActivitiesWithColour(this.scheduleFormModel).toPromise();
        
@@ -204,6 +218,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.actsub=this.ListenForExternalChangesColor()
       this.sub= this.ListenForExternalChanges();
     }
+    this.getinprogress=false;
   }
 
    private async GetCourseSettings(entities: Scheduleentity[][])
@@ -239,7 +254,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     );
           }
 
-    private ListenForExternalChanges(): Subscription {
+    private  ListenForExternalChanges(): Subscription {
   return  this.messhandler.ChangedEntity
     .pipe(takeUntil(this.unsubscribe))
     .subscribe(
@@ -247,7 +262,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
           {
              if(newEntity != null)
              {
-                this.AddEntity(newEntity);
+                if(!this.getinprogress)
+                {
+              this.getinprogress=true;
+             
+              
+
+                this.AddEntityStart(newEntity);
+
+                this.getinprogress=false;
+                }
              }
             this.cd.markForCheck();
           }
@@ -255,13 +279,37 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   
   }
- private AddEntity(newEntity: Scheduleentity):void {
+ private async AddEntityStart(newEntity: Scheduleentity):Promise<void> {
   //  throw new Error("Method not implemented.");
+  let week=this.getWeekNumber(newEntity.startD);
+  let temp=this.GetStartAndFromWeek(week);
+  this.week=week;
+   let newscheduleFormModel:ScheduleFormModel=
+   {
+    courseId:this.scheduleFormModel.courseId,
+    startTime:temp[0],
+    endTime:temp[1]
+   }
+  let  ReqEntities = await this.ScheduleService
+  .GetActivitiesWithColour(this.scheduleFormModel).toPromise();
+  let cs=await this.ScheduleService.GetCourseSettings(this.scheduleFormModel.courseId, this.scheduleFormModel.startTime, this.scheduleFormModel.endTime)
+  .toPromise();
+  if(cs!= null)
+  {
+    this.courseSettings=cs;
+    this.calculatemaxlength();
+    this.AddSchedulesTimes();
+    this.mapEntities(ReqEntities);
+    this.AddEntity(newEntity);
+  }
+ }
+ private  AddEntity(newEntity: Scheduleentity):void {
 
   // get this.entities, ad this one, set calc props to null for all affekted, the same day? a and the runt map?
    let entities=this.entities;
    let est:Date,eend:Date,lastst:Date;
    let nst:Date,nend:Date,lastend:Date;
+    let tmpnewEntity = {... newEntity};
   // newEntity.startD=new Date(newEntity.startTime);
   // newEntity.endD=new Date(newEntity.endTime);
    nst=newEntity.startD;
@@ -324,7 +372,7 @@ lastend=entities[rowid][entid].endD;
                       // if nst >= fram  but <=ost and lst>olst  nst => 0, skift the rest
                       if(newEntity.startD<= est && this.datediff(newEntity.endD,newEntity.startD)>= this.datediff(eend, est))
                       {
-                        entities[rowid].splice(entid,0,newEntity);
+                        entities[rowid].splice(entid,0,tmpnewEntity);
                         maxentid++;
                         undone=false;
                       }
@@ -332,7 +380,7 @@ lastend=entities[rowid][entid].endD;
                       {
                         if (entid+1>=entities[rowid].length)
                         {
-                          entities[rowid].splice(entid,0,newEntity);
+                          entities[rowid].splice(entid,0,tmpnewEntity);
                           maxentid++;
                           undone=false;
                         } 
@@ -348,7 +396,7 @@ lastend=entities[rowid][entid].endD;
                     && (this.datediff(lastend,lastst)>=this.datediff(newEntity.endD,newEntity.startD) )
                     && (this.datediff(newEntity.endD,newEntity.startD) >=this.datediff(eend,est) ))
                     {
-                      entities[rowid].splice(entid,0,newEntity);
+                      entities[rowid].splice(entid,0,tmpnewEntity);
                       maxentid++;
                       undone=false;
                     } 
@@ -356,7 +404,7 @@ lastend=entities[rowid][entid].endD;
                     {
                         if (entid+1>=entities[rowid].length)
                         {
-                          entities[rowid].splice(entid,0,newEntity);
+                          entities[rowid].splice(entid,0,tmpnewEntity);
                           maxentid++;
                           undone=false;
                         } 
@@ -491,6 +539,8 @@ lastend=entities[rowid][entid].endD;
 
  private mapEntities(entities: Scheduleentity[][]) {
     //Size...
+     if(entities)
+     {
     let size1=entities.length;
     let sizek= this.courseSettings.length;
     this.k=0;
@@ -500,7 +550,7 @@ lastend=entities[rowid][entid].endD;
     let startTime2:Date=startTime;
     let laststart=startTime;
     let lastend:Date=startTime;
-    let parmsK:findKmodel ={startTime:startTime,endTime:endTime,laststart:laststart, lastend:lastend }
+    let parmsK:findKmodel ={startTime:startTime,endTime:endTime,laststart:laststart, lastend:lastend, nextstart:this.courseSettings[1].startD}
     let i=1;
     let j=0;
     for(i=1; i< entities.length;i++)
@@ -548,7 +598,7 @@ lastend=entities[rowid][entid].endD;
              
               laststart=parmsK.startTime;
               let ent=entities[paramsSet.i][paramsSet.j];
-              this.setN(entities,0);
+              this.setN(entities,0,sizek);
 
               //set present
               
@@ -563,6 +613,8 @@ lastend=entities[rowid][entid].endD;
                 j=0;
               }
               this.size2= entities[i].length;
+              if(this.k>=sizek)
+                j++;
             }
             else
             {
@@ -573,6 +625,7 @@ lastend=entities[rowid][entid].endD;
     }
     this.entities=entities;
   }
+  }
 
   private findK(parmsK: findKmodel, startt :Date, sizek:number): any {
     if(this.savek != -1)
@@ -582,19 +635,36 @@ lastend=entities[rowid][entid].endD;
       parmsK.endTime=this.courseSettings[this.k].endD;
       parmsK.laststart=(this.k>0)?this.courseSettings[this.k-1].startD:parmsK.startTime;
       parmsK.lastend=(this.k>0)?this.courseSettings[this.k-1].endD:parmsK.endTime;
+      if(this.k>0&& this.k+1<sizek && this.compDay(parmsK.startTime,this.courseSettings[this.k-1].startD))
+      {
+        parmsK.nextstart=this.courseSettings[this.k+1].startD;
+      }
+      else
+      {
+        parmsK.nextstart=parmsK.startTime;
+      }
       this.savek=-1;
     }
-    while((parmsK.endTime < startt)  && (this.k< sizek) )
+    else
+    {
+      parmsK.laststart=parmsK.startTime;
+    }
+    while((this.k< sizek)  && (parmsK.endTime < startt)    )
     {
       this.k++;
       let startTime2=this.courseSettings[this.k].startD;
       if(this.compDay(parmsK.lastend,startTime2))
       {
         parmsK.lastend=parmsK.endTime;
+        parmsK.nextstart=startTime2;
       }
       else
       { // new Day
         parmsK.lastend=startTime2;
+        if(this.k+1<this.size2)
+        {
+          parmsK.nextstart=this.courseSettings[this.k+1].startD;
+        }
       }
       parmsK.startTime=startTime2;
       parmsK.endTime=this.courseSettings[this.k].endD;
@@ -606,8 +676,11 @@ lastend=entities[rowid][entid].endD;
    {
      return (s1<= e2) && (e1 >=s2);
    }
-   private setN(entities: Scheduleentity[][], extraN:number): void
+   private setN(entities: Scheduleentity[][], extraN:number, sizek:number): void
    {
+      if(this.k<sizek)
+      {
+
       
       // only call if not set so no check if cell is worked.
       if(this.courseSettings[this.k].n==-1)
@@ -649,10 +722,12 @@ lastend=entities[rowid][entid].endD;
       {
         this.savek=this.k;
       }
+    }
    }
 
  private setPresent(entities: Scheduleentity[][], parmsK: findKmodel, paramsSet: { i: number; j: number; }, startt: Date, endt: Date,sizek :number,size1:number): void
  {
+ let precalsoffset:number=0;
   let ent=entities[paramsSet.i][paramsSet.j];
   entities[paramsSet.i][paramsSet.j].offsettime=this.datediff(startt,parmsK.startTime)
    if(this.m==0)
@@ -661,11 +736,13 @@ lastend=entities[rowid][entid].endD;
    }
    else
    {
+    precalsoffset=this.datediff(parmsK.startTime,parmsK.nextstart);
      if(paramsSet.j>0)
      {
-        entities[paramsSet.i][paramsSet.j].offsettime+=entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
+        entities[paramsSet.i][paramsSet.j].offsettime+=precalsoffset+entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
      }
    }
+   entities[paramsSet.i][paramsSet.j].calcoffset=entities[paramsSet.i][paramsSet.j].offsettime-precalsoffset;
     entities[paramsSet.i][paramsSet.j].zindex=this.m;
     entities[paramsSet.i][paramsSet.j].width=100*(this.n-this.m)/this.n;
     entities[paramsSet.i][paramsSet.j].left=100*this.m/this.n;
@@ -689,6 +766,7 @@ lastend=entities[rowid][entid].endD;
     this.loopNext(entities,ent,parmsK,paramsSet,startt,endt,sizek,size1 );
     //loop next
     }
+
   }
 
 
@@ -718,11 +796,11 @@ lastend=entities[rowid][entid].endD;
         }
         if(paramsSet.i< size1)
         { // måste placera rätt här.
-          this.setN(entities,1 ); 
+          this.setN(entities,1 ,sizek); 
           // need to count the next insert too
  
 
-          let offsettime=0;
+          let offsettime=0, precalcoffsettime=0;
           offsettime+=this.datediff(parmsK.startTime,parmsK.lastend);
           if(this.m==0)
           {
@@ -733,9 +811,9 @@ lastend=entities[rowid][entid].endD;
           }
           if(this.m>0)
           {
-
+            precalcoffsettime=0;
             if(paramsSet.j>0)
-              offsettime+=entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
+              offsettime+=entities[paramsSet.i][paramsSet.j-1].calcoffset-entities[paramsSet.i][paramsSet.j-1].length;
           }
      
             entities[paramsSet.i].splice(paramsSet.j,0,{
@@ -744,6 +822,7 @@ lastend=entities[rowid][entid].endD;
               color:ent.color,
               length:(parmsK.endTime>endt)?this.datediff(endt,parmsK.startTime):this.datediff(parmsK.endTime,parmsK.startTime),
               offsettime:offsettime,
+              calcoffset:offsettime-precalcoffsettime,
               name:ent.name,
               description:ent.description,
               startTime:(parmsK.startTime>startt)?this.courseSettings[this.k].startTime:ent.startTime,
@@ -765,7 +844,7 @@ lastend=entities[rowid][entid].endD;
             break;
         else
         {  
-          this.setN(entities,0);
+        //  this.setN(entities,0,sizek);
           let startTime2=this.courseSettings[this.k].startD;
           if(this.compDay(parmsK.laststart,startTime2))
           {

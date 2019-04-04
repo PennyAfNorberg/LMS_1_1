@@ -13,6 +13,6 @@ namespace LMS_1_1.ViewModels
         public DateTime EndDate { get; set; }
         public string Description { get; set; }
         public int ActivityTypeId { get; set; }
-        public string moduleid { get; set; }
+        public string Moduleid { get; set; }
     }
 }

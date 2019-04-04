@@ -153,6 +153,7 @@ export class EditComponent implements OnInit, OnDestroy {
       color:this.Activity.color,
       length:null,
       offsettime:null,
+      calcoffset:null,
       name:this.Activity.name,
       description:this.Activity.description,
       startTime:startdatework.toLocaleString(),
