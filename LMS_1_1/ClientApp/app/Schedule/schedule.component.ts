@@ -637,11 +637,12 @@ lastend=entities[rowid][entid].endD;
       parmsK.lastend=(this.k>0)?this.courseSettings[this.k-1].endD:parmsK.endTime;
       if(this.k>0&& this.k+1<sizek && this.compDay(parmsK.startTime,this.courseSettings[this.k-1].startD))
       {
-        parmsK.nextstart=this.courseSettings[this.k+1].startD;
+        parmsK.nextstart=parmsK.startTime;
       }
       else
       {
-        parmsK.nextstart=parmsK.startTime;
+        parmsK.nextstart=this.courseSettings[this.k+1].startD;
+        
       }
       this.savek=-1;
     }
@@ -656,15 +657,14 @@ lastend=entities[rowid][entid].endD;
       if(this.compDay(parmsK.lastend,startTime2))
       {
         parmsK.lastend=parmsK.endTime;
-        parmsK.nextstart=startTime2;
+        parmsK.nextstart=parmsK.endTime;
       }
       else
       { // new Day
         parmsK.lastend=startTime2;
-        if(this.k+1<this.size2)
-        {
-          parmsK.nextstart=this.courseSettings[this.k+1].startD;
-        }
+    
+          parmsK.nextstart=startTime2;//this.courseSettings[this.k+1].startD;
+        
       }
       parmsK.startTime=startTime2;
       parmsK.endTime=this.courseSettings[this.k].endD;
