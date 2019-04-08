@@ -628,8 +628,14 @@ lastend=entities[rowid][entid].endD;
   }
 
   private findK(parmsK: findKmodel, startt :Date, sizek:number): any {
-    if(this.savek != -1)
+    if(this.savek != -1 || this.courseSettings[this.k].savek != -1)
     {
+      if(this.courseSettings[this.k].savek != -1 &&  this.savek == -1)
+      {
+        this.savek=this.courseSettings[this.k].savek;
+        this.courseSettings[this.k].savek=-1;
+      }
+
       this.k=this.savek;
       parmsK.startTime=this.courseSettings[this.k].startD;
       parmsK.endTime=this.courseSettings[this.k].endD;
@@ -718,9 +724,16 @@ lastend=entities[rowid][entid].endD;
         this.n=1;              
       }
       this.m=this.courseSettings[this.k].m;
-      if((this.n>1)&& (this.m+1<this.n) && this.savek==-1)
+      if((this.n>1)&& (this.m+1<this.n))
       {
-        this.savek=this.k;
+        if( this.savek==-1)
+        {
+           this.savek=this.k;
+        }
+        else
+        {
+            this.courseSettings[this.savek].savek=this.k;
+        }
       }
     }
    }
@@ -736,10 +749,10 @@ lastend=entities[rowid][entid].endD;
    }
    else
    {
-    precalsoffset=this.datediff(parmsK.startTime,parmsK.nextstart);
+    //precalsoffset=this.datediff(parmsK.startTime,parmsK.nextstart);
      if(paramsSet.j>0)
      {
-        entities[paramsSet.i][paramsSet.j].offsettime+=precalsoffset+entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
+        entities[paramsSet.i][paramsSet.j].offsettime+=this.datediff(ent.startD,entities[paramsSet.i][paramsSet.j-1].startD)+entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
      }
    }
    entities[paramsSet.i][paramsSet.j].calcoffset=entities[paramsSet.i][paramsSet.j].offsettime-precalsoffset;

@@ -73,4 +73,5 @@ export class CourseSettingsViewModel
     n:number;
     startD?:Date;
     endD?:Date;
+    savek:number=-1;
 }

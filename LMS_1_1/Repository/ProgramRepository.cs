@@ -445,7 +445,8 @@ namespace LMS_1_1.Repository
                         EndTime = DateCheck.ToString("yyyy-MM-dd") + " " + cs.EndTime,
                         ForDate = DateCheck,
                         N = -1,
-                        M = 0
+                        M = 0,
+                        Savek=-1
                         
                     })
                     );

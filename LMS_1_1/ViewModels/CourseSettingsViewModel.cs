@@ -23,5 +23,6 @@ namespace LMS_1_1.ViewModels
         public int? N { get; set; }
 
         public int? M { get; set; }
+        public int?  Savek { get; set; }
     }
 }
