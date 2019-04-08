@@ -46,9 +46,9 @@ export class ScheduleService  implements  OnDestroy {
         public DateTime EndTime { get; set; }
 */
 
-   public GetModulesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentity[][]>| undefined
+   public GetModulesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentity[][][]>| undefined
 {
-   return this.http.post<Scheduleentity[][]>(this.courseUrl+'/ModulesWithColor',  scheduleFormModel,
+   return this.http.post<Scheduleentity[][][]>(this.courseUrl+'/ModulesWithColor',  scheduleFormModel,
    {headers: this.getAuthHeader() 
 }).pipe(
    tap(result => JSON.stringify(result)),
@@ -56,9 +56,9 @@ export class ScheduleService  implements  OnDestroy {
 );
 }
 
-public GetActivitiesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentity[][]>| undefined
+public GetActivitiesWithColour(scheduleFormModel:ScheduleFormModel) : Observable<Scheduleentity[][][]>| undefined
 {
-   return this.http.post<Scheduleentity[][]>(this.courseUrl+'/ActivitiesWithColor',  scheduleFormModel,
+   return this.http.post<Scheduleentity[][][]>(this.courseUrl+'/ActivitiesWithColor',  scheduleFormModel,
    {headers: this.getAuthHeader() 
 }).pipe(
    tap(result => JSON.stringify(result)),

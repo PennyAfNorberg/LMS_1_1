@@ -91,7 +91,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
   }
   private weekdays: weekdays[]; //=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  private entities:Scheduleentity[][];
+  private entities:Scheduleentity[][][];
  
   constructor(private cd: ChangeDetectorRef , private router: Router
     , private CourseService: CourseService
@@ -160,7 +160,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private async requery() :Promise<void> {
    // if all pars send q
   
-   let entities: Scheduleentity[][];
+   let entities: Scheduleentity[][][];
    let cs:CourseSettingsViewModel[];
    let newColor:ScheduleColors;
    
@@ -221,7 +221,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.getinprogress=false;
   }
 
-   private async GetCourseSettings(entities: Scheduleentity[][])
+   private async GetCourseSettings(entities: Scheduleentity[][][])
    {
     this.ScheduleService.GetCourseSettings(this.scheduleFormModel.courseId, this.scheduleFormModel.startTime, this.scheduleFormModel.endTime)
     .pipe(takeUntil(this.unsubscribe))
@@ -319,24 +319,28 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 //GrEDate(a:Date, b:Date)
 let rowid=1
 let entid=0
+let divid=0;
 let maxentid=0;
-lastst=entities[rowid][entid].startD;
-lastend=entities[rowid][entid].endD;
+lastst=entities[rowid][divid][entid].startD;
+lastend=entities[rowid][divid][entid].endD;
    while(rowid< entities.length)
     {
+      divid=0;
+      while(divid <entities[rowid].length)
+      {
         entid=0
-        maxentid=entities[rowid].length;
+        maxentid=entities[rowid][divid].length;
         while(entid <maxentid)
         {
           deleted=false;
-            est=entities[rowid][entid].startD;
-            eend=entities[rowid][entid].endD;
-            if(newEntity.operationid==2 && entities[rowid][entid].operationid!=2)
+            est=entities[rowid][divid][entid].startD;
+            eend=entities[rowid][divid][entid].endD;
+            if(newEntity.operationid==2 && entities[rowid][divid][entid].operationid!=2)
             {
-              if(newEntity.id==entities[rowid][entid].id)
+              if(newEntity.id==entities[rowid][divid][entid].id)
               {
 
-                  entities[rowid].splice(entid,1);
+                  entities[rowid][divid].splice(entid,1);
                   maxentid--;
                   deleted=true;
               }
@@ -344,9 +348,9 @@ lastend=entities[rowid][entid].endD;
             }
             if(newEntity.operationid==3)
             {
-              if(newEntity.id==entities[rowid][entid].id)
+              if(newEntity.id==entities[rowid][divid][entid].id)
               {
-                  entities[rowid][entid].color=this.deleteColor;
+                  entities[rowid][divid][entid].color=this.deleteColor;
                   
               }
 
@@ -359,11 +363,11 @@ lastend=entities[rowid][entid].endD;
                 this.resetNM(est,eend);
                 if(!deleted)
                 {
-                  entities[rowid][entid].length=null;
-                  entities[rowid][entid].offsettime=null;
-                  entities[rowid][entid].zindex=null;
-                  entities[rowid][entid].width=null;
-                  entities[rowid][entid].left=null;
+                  entities[rowid][divid][entid].length=null;
+                  entities[rowid][divid][entid].offsettime=null;
+                  entities[rowid][divid][entid].zindex=null;
+                  entities[rowid][divid][entid].width=null;
+                  entities[rowid][divid][entid].left=null;
                 }
                 if(undone)
                 {
@@ -372,15 +376,15 @@ lastend=entities[rowid][entid].endD;
                       // if nst >= fram  but <=ost and lst>olst  nst => 0, skift the rest
                       if(newEntity.startD<= est && this.datediff(newEntity.endD,newEntity.startD)>= this.datediff(eend, est))
                       {
-                        entities[rowid].splice(entid,0,tmpnewEntity);
+                        entities[rowid][divid].splice(entid,0,tmpnewEntity);
                         maxentid++;
                         undone=false;
                       }
                       else
                       {
-                        if (entid+1>=entities[rowid].length)
+                        if (entid+1>=entities[rowid][divid].length)
                         {
-                          entities[rowid].splice(entid,0,tmpnewEntity);
+                          entities[rowid][divid].splice(entid,0,tmpnewEntity);
                           maxentid++;
                           undone=false;
                         } 
@@ -396,7 +400,7 @@ lastend=entities[rowid][entid].endD;
                     && (this.datediff(lastend,lastst)>=this.datediff(newEntity.endD,newEntity.startD) )
                     && (this.datediff(newEntity.endD,newEntity.startD) >=this.datediff(eend,est) ))
                     {
-                      entities[rowid].splice(entid,0,tmpnewEntity);
+                      entities[rowid][divid].splice(entid,0,tmpnewEntity);
                       maxentid++;
                       undone=false;
                     } 
@@ -404,7 +408,7 @@ lastend=entities[rowid][entid].endD;
                     {
                         if (entid+1>=entities[rowid].length)
                         {
-                          entities[rowid].splice(entid,0,tmpnewEntity);
+                          entities[rowid][divid].splice(entid,0,tmpnewEntity);
                           maxentid++;
                           undone=false;
                         } 
@@ -421,10 +425,14 @@ lastend=entities[rowid][entid].endD;
         }
          entid++;
       }
+       divid++;
+      }
       rowid++;
     }
+    // Make to [][0][]
     this.mapEntities( entities);
   }
+
  private resetNM(est: Date, eend: Date): void {
     let k=0;
     let sizek=this.courseSettings.length;
@@ -459,18 +467,20 @@ lastend=entities[rowid][entid].endD;
 
     for(let rowid=0; rowid< this.entities.length;rowid++)
     {
-        for(let entid=0; entid <this.entities[rowid].length; entid++)
+      for( let divid=0 ; divid < this.entities[rowid].length; divid++)
+      {
+        for(let entid=0; entid <this.entities[rowid][divid].length; entid++)
         {
   
-            if(((newColor.id != null) && (newColor.id===this.entities[rowid][entid].id)) || 
-            ((newColor.activitytypid!= null) && (newColor.activitytypid=== this.entities[rowid][entid].activitytypid)))
+            if(((newColor.id != null) && (newColor.id===this.entities[rowid][divid][entid].id)) || 
+            ((newColor.activitytypid!= null) && (newColor.activitytypid=== this.entities[rowid][divid][entid].activitytypid)))
             {
-              this.entities[rowid][entid].color=newColor.color;
+              this.entities[rowid][divid][entid].color=newColor.color;
             }
         
-    
         }
       }
+    }
   }
 
   private AddSchedulesTimes(): any {
@@ -537,14 +547,16 @@ lastend=entities[rowid][entid].endD;
     this.maxlength=maxlen;
   }
 
- private mapEntities(entities: Scheduleentity[][]) {
+
+
+ private mapEntities(entities: Scheduleentity[][][]) {
     //Size...
      if(entities)
      {
     let size1=entities.length;
     let sizek= this.courseSettings.length;
     this.k=0;
-  
+   let svarentities:Scheduleentity[][][];
     let startTime=this.courseSettings[0].startD;
     let endTime=this.courseSettings[0].endD;
     let startTime2:Date=startTime;
@@ -553,19 +565,22 @@ lastend=entities[rowid][entid].endD;
     let parmsK:findKmodel ={startTime:startTime,endTime:endTime,laststart:laststart, lastend:lastend, nextstart:this.courseSettings[1].startD}
     let i=1;
     let j=0;
+    let kindex=0;
     for(i=1; i< entities.length;i++)
     {
-      for(j=0; j<entities[i].length;j++)
+
+      for(j=0; j<entities[i][0].length;j++)
       {
-        if(entities[i][j].startD==null)
+        if(entities[i][0][j].startD==null)
         {
-          entities[i][j].startD=new Date(entities[i][j].startTime);
+          entities[i][0][j].startD=new Date(entities[i][0][j].startTime);
         }
-        if(entities[i][j].endD==null)
+        if(entities[i][0][j].endD==null)
         {
-          entities[i][j].endD=new Date(entities[i][j].endTime);
+          entities[i][0][j].endD=new Date(entities[i][0][j].endTime);
         }
       }
+      
     }
 
     i=1;
@@ -577,32 +592,32 @@ lastend=entities[rowid][entid].endD;
         i=this.savei;
         this.savei=-1;
       }
-      this.size2= entities[i].length;
+      this.size2= entities[i][0].length;
       
          j=0;
         while(j<this.size2)
       //  for( let j=0; j<size2; j++)
         {
           
-          if(entities[i][j] && entities[i][j].length==null)
+          if(entities[i][0][j] && entities[i][0][j].length==null)
             {    
               
               
-              let endt:Date=entities[i][j].endD;
-              let startt:Date=entities[i][j].startD;
+              let endt:Date=entities[i][0][j].endD;
+              let startt:Date=entities[i][0][j].startD;
               
-              let paramsSet= {i:i,j:j};
+              let paramsSet= {i:i,j:j,k:this.k};
               
               //find k
               this.findK(parmsK,startt,sizek );
              
               laststart=parmsK.startTime;
-              let ent=entities[paramsSet.i][paramsSet.j];
+              let ent=entities[paramsSet.i][0][paramsSet.j];
               this.setN(entities,0,sizek);
 
               //set present
               
-              this.setPresent(entities,parmsK,paramsSet,startt,endt,sizek, size1)
+              this.setPresent(entities,parmsK,paramsSet,startt,endt,sizek, size1,svarentities)
               i=paramsSet.i;
               j=paramsSet.j;
               
@@ -623,7 +638,7 @@ lastend=entities[rowid][entid].endD;
         }
         i++;
     }
-    this.entities=entities;
+    this.entities=svarentities;
   }
   }
 
@@ -676,13 +691,14 @@ lastend=entities[rowid][entid].endD;
       parmsK.endTime=this.courseSettings[this.k].endD;
       
     }
+
   } 
 
    private checkpred(s1:Date,s2:Date,e1:Date, e2:Date ): boolean
    {
      return (s1<= e2) && (e1 >=s2);
    }
-   private setN(entities: Scheduleentity[][], extraN:number, sizek:number): void
+   private setN(entities: Scheduleentity[][][], extraN:number, sizek:number): void
    {
       if(this.k<sizek)
       {
@@ -702,7 +718,8 @@ lastend=entities[rowid][entid].endD;
          let i=0;
         for(let row of entities)
         {
-           for(let cs of row)
+
+           for(let cs of row[0])
            {
               if(this.checkpred(cs.startD,csStartTime,cs.endD, csEndTime ))
               {
@@ -710,6 +727,7 @@ lastend=entities[rowid][entid].endD;
                 i++;
               }
             }
+          
         } 
 
         this.courseSettings[this.k].n=i+extraN;
@@ -738,59 +756,59 @@ lastend=entities[rowid][entid].endD;
     }
    }
 
- private setPresent(entities: Scheduleentity[][], parmsK: findKmodel, paramsSet: { i: number; j: number; }, startt: Date, endt: Date,sizek :number,size1:number): void
+ private setPresent(entities: Scheduleentity[][][], parmsK: findKmodel, paramsSet: { i: number; j: number; k: number; }, startt: Date, endt: Date,sizek :number,size1:number, svarentities: Scheduleentity[][][]): void
  {
  let precalsoffset:number=0;
-  let ent=entities[paramsSet.i][paramsSet.j];
-  entities[paramsSet.i][paramsSet.j].offsettime=this.datediff(startt,parmsK.startTime)
+  let ent=entities[paramsSet.i][0][paramsSet.j];
+  svarentities[paramsSet.i][paramsSet.k][paramsSet.j].offsettime=this.datediff(startt,parmsK.startTime)
    if(this.m==0)
    {
-    entities[paramsSet.i][paramsSet.j].offsettime+=this.datediff(parmsK.startTime,parmsK.lastend);
+    svarentities[paramsSet.i][paramsSet.k][paramsSet.j].offsettime+=this.datediff(parmsK.startTime,parmsK.lastend);
    }
    else
    {
     //precalsoffset=this.datediff(parmsK.startTime,parmsK.nextstart);
      if(paramsSet.j>0)
      {
-        entities[paramsSet.i][paramsSet.j].offsettime+=this.datediff(ent.startD,entities[paramsSet.i][paramsSet.j-1].startD)+entities[paramsSet.i][paramsSet.j-1].offsettime-entities[paramsSet.i][paramsSet.j-1].length;
+      svarentities[paramsSet.i][paramsSet.k][paramsSet.j].offsettime+=this.datediff(ent.startD, svarentities[paramsSet.i][paramsSet.k][paramsSet.j-1].startD)+ svarentities[paramsSet.i][paramsSet.k][paramsSet.j-1].offsettime- svarentities[paramsSet.i][paramsSet.k][paramsSet.j-1].length;
      }
    }
-   entities[paramsSet.i][paramsSet.j].calcoffset=entities[paramsSet.i][paramsSet.j].offsettime-precalsoffset;
-    entities[paramsSet.i][paramsSet.j].zindex=this.m;
-    entities[paramsSet.i][paramsSet.j].width=100*(this.n-this.m)/this.n;
-    entities[paramsSet.i][paramsSet.j].left=100*this.m/this.n;
+   svarentities[paramsSet.i][paramsSet.k][paramsSet.j].calcoffset=svarentities[paramsSet.i][paramsSet.k][paramsSet.j].offsettime-precalsoffset;
+   svarentities[paramsSet.i][paramsSet.k][paramsSet.j].zindex=this.m;
+   svarentities[paramsSet.i][paramsSet.k][paramsSet.j].width=100*(this.n-this.m)/this.n;
+   svarentities[paramsSet.i][paramsSet.k][paramsSet.j].left=100*this.m/this.n;
     this.courseSettings[this.k].m++;
     this.m++;
   
     let tmpstartt=(parmsK.startTime>startt)?parmsK.startTime:startt
     let tmpendt=(parmsK.endTime<endt)?parmsK.endTime:endt;
-    entities[paramsSet.i][paramsSet.j].startD=tmpstartt;
-    entities[paramsSet.i][paramsSet.j].endD=tmpendt;
-    entities[paramsSet.i][paramsSet.j].startTime=tmpstartt.toLocaleString();
-    entities[paramsSet.i][paramsSet.j].endTime=tmpendt.toLocaleString();
-    entities[paramsSet.i][paramsSet.j].operationid=null;
-    entities[paramsSet.i][paramsSet.j].length=this.datediff(tmpendt,tmpstartt);
+    entities[paramsSet.i][paramsSet.k][paramsSet.j].startD=tmpstartt;
+    entities[paramsSet.i][paramsSet.k][paramsSet.j].endD=tmpendt;
+    entities[paramsSet.i][paramsSet.k][paramsSet.j].startTime=tmpstartt.toLocaleString();
+    entities[paramsSet.i][paramsSet.k][paramsSet.j].endTime=tmpendt.toLocaleString();
+    entities[paramsSet.i][paramsSet.k][paramsSet.j].operationid=null;
+    entities[paramsSet.i][paramsSet.k][paramsSet.j].length=this.datediff(tmpendt,tmpstartt);
    if((startt=>parmsK.startTime) && (endt<= parmsK.endTime)  )
    {
     paramsSet.j++;  
    }
    else
    {
-    this.loopNext(entities,ent,parmsK,paramsSet,startt,endt,sizek,size1 );
+    this.loopNext(entities,ent,parmsK,paramsSet,startt,endt,sizek,size1, svarentities );
     //loop next
     }
 
   }
 
 
- private loopNext(entities: Scheduleentity[][],ent:Scheduleentity, parmsK: findKmodel, paramsSet: { i: number; j: number; }, startt: Date, endt: Date,sizek :number, size1:number): any {
+ private loopNext(entities: Scheduleentity[][][],ent:Scheduleentity, parmsK: findKmodel, paramsSet: { i: number; j: number;  k: number; }, startt: Date, endt: Date,sizek :number, size1:number, svarentities: Scheduleentity[][][]): any {
     
     this.k++;
     parmsK.lastend=parmsK.endTime;
     parmsK.laststart=parmsK.startTime;
     parmsK.startTime=this.courseSettings[this.k].startD;
     parmsK.endTime=this.courseSettings[this.k].endD;
-       
+    paramsSet.k=this.k;
     paramsSet.j++;
     while((parmsK.startTime<= endt) && (paramsSet.i< size1) && (this.k<sizek))
     {
@@ -803,7 +821,7 @@ lastend=entities[rowid][entid].endD;
           parmsK.lastend=parmsK.startTime;
           parmsK.laststart=parmsK.startTime;
           this.size2= entities[paramsSet.i].length;
-          while(entities[paramsSet.i][paramsSet.j] && entities[paramsSet.i][paramsSet.j].length!= null &&  paramsSet.j<this.size2 )
+          while(svarentities[paramsSet.i][paramsSet.k][paramsSet.j] && svarentities[paramsSet.i][paramsSet.k][paramsSet.j].length!= null &&  paramsSet.j<this.size2 )
             paramsSet.j++;
 
         }
@@ -819,17 +837,17 @@ lastend=entities[rowid][entid].endD;
           {
               if((this.courseSettings[this.k-1].m >0) && ( paramsSet.j>0))
               {
-                offsettime+=entities[paramsSet.i][paramsSet.j-1].offsettime;
+                offsettime+=svarentities[paramsSet.i][paramsSet.k][paramsSet.j-1].offsettime;
               }
           }
           if(this.m>0)
           {
             precalcoffsettime=0;
             if(paramsSet.j>0)
-              offsettime+=entities[paramsSet.i][paramsSet.j-1].calcoffset-entities[paramsSet.i][paramsSet.j-1].length;
+              offsettime+=svarentities[paramsSet.i][paramsSet.k][paramsSet.j-1].calcoffset-svarentities[paramsSet.i][paramsSet.j-1].length;
           }
      
-            entities[paramsSet.i].splice(paramsSet.j,0,{
+          svarentities[paramsSet.i][paramsSet.k].splice(paramsSet.j,0,{
               weekday:"",
               id:ent.id,
               color:ent.color,
@@ -853,6 +871,7 @@ lastend=entities[rowid][entid].endD;
         }
         paramsSet.j++; 
         this.k++;
+        paramsSet.k=this.k;
         if(this.k==sizek)
             break;
         else
